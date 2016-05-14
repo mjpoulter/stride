@@ -4,6 +4,17 @@ static Window *s_window;
 static Layer *s_canvas_layer, *s_text_layer;
 
 static char s_current_time_buffer[8];
+static char s_current_date_buffer[11];
+
+static const char *const s_day_names[7] =
+{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+
+static const char *const s_month_names[12] =
+{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+static bool bleConnected;
+static bool batteryCharging;
+static int batteryLevel;
 
 static void progress_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
@@ -21,25 +32,37 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
   // Decide color scheme based on progress to/past goal
   GColor scheme_color;
   GBitmap *bitmap;
-  if(current_steps >= current_average) {
-    scheme_color  = GColorJaegerGreen;
-    bitmap = data_get_green_shoe();
-  } else {
-    scheme_color = GColorPictonBlue;
-    bitmap = data_get_blue_shoe();
-  }
-
   // Perform drawing
+    if(current_steps <= current_average) {
+        scheme_color  = GColorFromRGB(255, 0, 0);
+        bitmap = data_get_blue_shoe();
+        graphics_fill_outer_ring(ctx, current_steps, fill_thickness, bounds, scheme_color);
+    }
+    else{
+        scheme_color = GColorJaegerGreen;
+        bitmap = data_get_green_shoe();
+        graphics_fill_outer_ring(ctx, data_get_daily_average(), fill_thickness, bounds,scheme_color );
+        graphics_fill_outer_ring(ctx, (current_steps-current_average), fill_thickness, bounds, GColorPictonBlue);
+
+
+    }
+
   graphics_draw_outer_dots(ctx, bounds);
-  graphics_fill_outer_ring(ctx, current_steps, fill_thickness, bounds, scheme_color);
   graphics_fill_goal_line(ctx, daily_average, 17, 4, bounds, GColorYellow);
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
+  GPoint pt;
+  pt.x=15;
+  pt.y=15;
+  graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()));//bleConnected));
+  pt.x=15;
+  pt.y=15;
 }
 
 static void text_update_proc(Layer *layer, GContext *ctx) {
   const GRect layer_bounds = layer_get_bounds(layer);
 
   const GFont font_med = data_get_font(FontSizeMedium);
+  const GFont font_small = data_get_font(FontSizeSmall);
   const GFont font_large = data_get_font(FontSizeLarge);
 
   // Get total width
@@ -55,21 +78,24 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
   const int x_margin = (layer_bounds.size.w - total_width) / 2;
   const int y_margin = PBL_IF_RECT_ELSE(8, 2);
   const GRect time_rect = grect_inset(layer_bounds, GEdgeInsets(-y_margin, 0, 0, x_margin));
+  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+10, 0, 0, x_margin+3));  
   graphics_context_set_text_color(ctx, GColorWhite);
-  graphics_draw_text(ctx, s_current_time_buffer, font_large, time_rect, 
+  graphics_draw_text(ctx, s_current_time_buffer, font_large, time_rect,
                      GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-
+ 
+ graphics_draw_text(ctx, s_current_date_buffer, font_small, date_rect,
+                     GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   if(!clock_is_24h_style()) {
     // 12 hour mode
     const struct tm *time_now = util_get_tm();
     const bool am = time_now->tm_hour < 12;
     const int spacing = 2;
 
-    const GRect period_rect = grect_inset(layer_bounds, 
+    const GRect period_rect = grect_inset(layer_bounds,
       GEdgeInsets(PBL_IF_RECT_ELSE(-2, 4), 0, 0, time_size.w + x_margin + spacing));
-    graphics_draw_text(ctx, am ? "AM" : "PM", font_med, period_rect, 
+    graphics_draw_text(ctx, am ? "AM" : "PM", font_med, period_rect,
                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  }
+  } 
 }
 
 /*********************************** Window ***********************************/
@@ -110,6 +136,9 @@ void main_window_push() {
 void main_window_update_time(struct tm* tick_time) {
   strftime(s_current_time_buffer, sizeof(s_current_time_buffer),
     clock_is_24h_style() ? "%H:%M" : "%l:%M", tick_time);
+      /// Added tu support date 
+  snprintf(s_current_date_buffer, sizeof(s_current_date_buffer), "%s %d %s",
+    s_day_names[tick_time->tm_wday], tick_time->tm_mday,s_month_names[ tick_time->tm_mon ]);
   layer_mark_dirty(s_text_layer);
 }
 
@@ -118,4 +147,13 @@ void main_window_redraw() {
     layer_mark_dirty(s_canvas_layer);
     layer_mark_dirty(s_text_layer);
   }
+}
+
+void main_window_update_ble(bool isConnected){
+    bleConnected=isConnected;
+
+}
+void main_window_update_battery(bool isCharging,int charge){
+    batteryCharging=isCharging;
+    batteryLevel=charge;
 }
