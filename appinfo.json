@@ -1,11 +1,11 @@
 {
-  "uuid": "64AF47E3-942B-4B1B-859D-DC3181524C1E",
-  "shortName": "Stride",
-  "longName": "Stride",
-  "companyName": "Pebble",
-  "versionLabel": "1.5",
+  "uuid": "E4423BF0-C711-4331-B650-F3EDD23B5A35",
+  "shortName": "Analog stride",
+  "longName": "Analog stride",
+  "companyName": "Martin Diz",
+  "versionLabel": "1",
   "sdkVersion": "3",
-  "targetPlatforms": ["basalt", "chalk"],
+  "targetPlatforms": ["basalt"],
   "watchapp": {
     "watchface": true
   },
@@ -20,13 +20,33 @@
       {
         "type": "png",
         "name": "BLUE_SHOE_LOGO",
-        "file": "blue_shoe.png"
+        "file": "img/blue_shoe.png"
       },
       {
         "type": "png",
         "name": "GREEN_SHOE_LOGO",
-        "file": "green_shoe.png"
-      }
+        "file": "img/green_shoe.png"
+      },
+      {
+  "type":"png",
+  "name":"IMAGE_BATTERY",
+  "file":"img/battery.png"
+},
+    {
+  "type":"png",
+  "name":"IMAGE_BATTERY_CHARGER",
+  "file":"img/batteryCharger.png"
+},
+    {
+  "type":"png",
+  "name":"IMAGE_BLE",
+  "file":"img/ble.png"
+},
+        {
+  "type":"png",
+  "name":"IMAGE_BLEN",
+  "file":"img/bleN.png"
+}
     ]
   }
 }
