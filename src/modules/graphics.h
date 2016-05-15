@@ -15,3 +15,6 @@ void graphics_fill_goal_line(GContext *ctx, int32_t day_average_steps,
 void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitmap *bitmap);
 
 void graphics_set_window(Window *window);
+
+void graphics_draw_status_icons(GContext *ctx, GPoint cx,GBitmap* bitmapBaterry,GBitmap*bitmapBLE,unsigned int charge);
+ 

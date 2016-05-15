@@ -19,9 +19,9 @@ static int get_rect_perimeter() {
 }
 #endif
 
-/* 
+/*
  * The progress is drawn according to progress through the following perimeter zones
- * 
+ *
  * e       a       b
  *   -------------
  *   |           |
@@ -39,39 +39,39 @@ static GPoint steps_to_point(int current_steps, int day_average_steps, GRect fra
 
   // Limits calculated from length along perimeter starting from 'a'
   const int limit_b = day_average_steps * TOP_RIGHT / rect_perimeter;
-  const int limit_c = day_average_steps * BOT_RIGHT / rect_perimeter; 
+  const int limit_c = day_average_steps * BOT_RIGHT / rect_perimeter;
   const int limit_d = day_average_steps * BOT_LEFT / rect_perimeter;
   const int limit_e = day_average_steps * TOP_LEFT / rect_perimeter;
 
   if(current_steps <= limit_b) {
     // We are in between zone a <-> b
-    return GPoint(frame.origin.x 
-                    + DIV_X(frame.size.w * (500 + (500 * current_steps / limit_b))), 
+    return GPoint(frame.origin.x
+                    + DIV_X(frame.size.w * (500 + (500 * current_steps / limit_b))),
                   frame.origin.y);
   } else if(current_steps <= limit_c) {
     // We are in between zone b <-> c
     return GPoint(frame.origin.x + frame.size.w,
-                  frame.origin.y 
+                  frame.origin.y
                     + DIV_X(frame.size.h * MULT_X((current_steps - limit_b), (limit_c - limit_b))));
   } else if(current_steps <= limit_d) {
     // We are in between zone c <-> d
-    return GPoint(frame.origin.x 
+    return GPoint(frame.origin.x
                     + DIV_X(frame.size.w * (1000 - MULT_X((current_steps - limit_c), (limit_d - limit_c)))),
                   frame.origin.y + frame.size.h);
   } else if(current_steps <= limit_e) {
     // We are in between zone d <-> e
     return GPoint(frame.origin.x,
-                  frame.origin.y 
+                  frame.origin.y
                     + DIV_X(frame.size.h * (1000 - MULT_X((current_steps - limit_d), (limit_e - limit_d)))));
   } else {
     // We are in between zone e <-> 0
-    return GPoint(frame.origin.x 
+    return GPoint(frame.origin.x
                     + DIV_X(frame.size.w / 2 * MULT_X((current_steps - limit_e), (day_average_steps - limit_e))),
                   frame.origin.y);
   }
 #elif defined(PBL_ROUND)
   // Simply a calculated point on the circumference
-  const int angle = DIV_X(360 * 
+  const int angle = DIV_X(360 *
                 MULT_X(current_steps, day_average_steps));
   return gpoint_from_polar(frame, GOvalScaleModeFitCircle, DEG_TO_TRIGANGLE(angle));
 #endif
@@ -99,7 +99,8 @@ void graphics_draw_outer_dots(GContext *ctx, GRect bounds) {
     for(int i = 0; i <= rect_perimeter; i += quarter_perimeter) {
       // Put middle dots on each side of screen
       GPoint middle = steps_to_point(i, rect_perimeter, inset_bounds);
-      graphics_context_set_fill_color(ctx, GColorDarkGray);
+      //graphics_context_set_fill_color(ctx, GColorDarkGray);
+        graphics_context_set_fill_color(ctx, GColorWhite);
       graphics_fill_circle(ctx, middle, dot_radius);
 
       // Puts two dots between each middle dot
@@ -160,11 +161,11 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
 
   // Start the path with start_outer_point
   path.points[path.num_points++] = start_outer_point;
-  
+
   // Loop through and add all the corners between start and end
   for(uint16_t i = 0; i < ARRAY_LENGTH(corners); i++) {
     if(corners[i] > 0 && corners[i] < current_steps) {
-      path.points[path.num_points++] = steps_to_point(corners[i], day_average_steps, 
+      path.points[path.num_points++] = steps_to_point(corners[i], day_average_steps,
                                                           outer_bounds);
     }
   }
@@ -175,8 +176,8 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
   // Loop though backwards and add all the corners between end and start
   for(int i = ARRAY_LENGTH(corners) - 1; i >= 0; i--) {
     if(corners[i] > 0 && corners[i] < current_steps) {
-      path.points[path.num_points++] = inset_point(steps_to_point(corners[i], 
-                                                                          day_average_steps, 
+      path.points[path.num_points++] = inset_point(steps_to_point(corners[i],
+                                                                          day_average_steps,
                                                                           outer_bounds),
                                                        fill_thickness);
     }
@@ -188,8 +189,13 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
   gpath_draw_filled(ctx, &path);
   graphics_context_set_stroke_color(ctx, color);
   gpath_draw_outline(ctx, &path);
-
   free(path.points);
+  /// Add round end point.
+    graphics_context_set_fill_color(ctx, color);
+    GPoint center;
+    center.x=(end_outer_point.x+end_inner_point.x)/2;
+    center.y=(end_outer_point.y+end_inner_point.y)/2;
+    graphics_fill_circle(ctx, center, 5);
 #elif defined(PBL_ROUND)
   graphics_fill_radial(ctx, frame, GOvalScaleModeFitCircle, fill_thickness,
                        DEG_TO_TRIGANGLE(0),
@@ -226,7 +232,7 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
 
   shoe_bitmap_box.size = gbitmap_get_bounds(data_get_green_shoe()).size;
 
-  int text_width = graphics_text_layout_get_content_size(steps_buffer, 
+  int text_width = graphics_text_layout_get_content_size(steps_buffer,
       data_get_font(FontSizeSmall), steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter).w;
   const int font_height = 14;
   const int padding = 5;
@@ -239,10 +245,31 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
   shoe_bitmap_box.origin.y = PBL_IF_RECT_ELSE(60, 65);
 
   graphics_context_set_text_color(ctx, color);
-  graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeSmall), 
+  graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeSmall),
                      steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 
   graphics_draw_bitmap_in_rect(ctx, bitmap, shoe_bitmap_box);
+}
+/// Added to support BLE and Battery
+void graphics_draw_status_icons(GContext *ctx, GPoint xy,GBitmap* bitmapBaterry,GBitmap*bitmapBLE, unsigned int charge){
+    GRect bleBox,batteryBox;
+    /// get size
+    bleBox.size=gbitmap_get_bounds(bitmapBLE).size;
+    batteryBox.size=gbitmap_get_bounds(bitmapBaterry).size;
+    bleBox.origin=xy;
+    /// Screen width 144
+    /// Should be right aligned with 15 px margin
+    xy.x=140-15-batteryBox.size.w;
+    batteryBox.origin=xy;
+    graphics_draw_bitmap_in_rect(ctx,bitmapBLE,bleBox);
+     APP_LOG(APP_LOG_LEVEL_DEBUG, "BLE box is in (%d,%d) with siz (%d,%d)",
+   bleBox.origin.x,bleBox.origin.y,bleBox.size.w,bleBox.size.h);
+    graphics_draw_bitmap_in_rect(ctx,bitmapBaterry,batteryBox);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "BLE box is in (%d,%d) with siz (%d,%d)",
+    batteryBox.origin.x,batteryBox.origin.y,batteryBox.size.w,batteryBox.size.h);
+    graphics_context_set_fill_color(ctx, GColorGreen);
+    graphics_fill_rect(ctx, GRect(batteryBox.origin.x+7, batteryBox.origin.y+4, (uint8_t)((charge / 100.0) * 11.0), 4), 0, GCornerNone);
+
 }
 
 void graphics_set_window(Window *window) {

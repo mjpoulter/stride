@@ -9,4 +9,5 @@
 #define PAST_DAYS_CONSIDERED 7
 
 // Delay after launch before querying the Health API
-#define LOAD_DATA_DELAY 500
+//#define LOAD_DATA_DELAY 500
+#define LOAD_DATA_DELAY 0

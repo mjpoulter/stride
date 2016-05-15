@@ -11,7 +11,9 @@ typedef enum {
   AverageTypeDaily
 } AverageType;
 
-static GBitmap *s_blue_shoe, *s_green_shoe;
+/// added BLE and Battery
+static GBitmap *s_blue_shoe, *s_green_shoe, *sbmpBleN,*sbmpBle,*sbmpBatteryCharging,*sbmpBattery;
+
 static GFont s_font_small, s_font_big, s_font_med;
 
 static int s_current_steps, s_daily_average, s_current_average;
@@ -35,14 +37,14 @@ static void update_average(AverageType type) {
     default:
       if(DEBUG) APP_LOG(APP_LOG_LEVEL_ERROR, "Unknown average type!");
       break;
-  } 
+  }
 
   // Check the average data is available
   HealthServiceAccessibilityMask mask = health_service_metric_averaged_accessible(
                                 HealthMetricStepCount, start, end, HealthServiceTimeScopeDaily);
   if(mask & HealthServiceAccessibilityMaskAvailable) {
     // Data is available, read it
-    steps = (int)health_service_sum_averaged(HealthMetricStepCount, start, end, 
+    steps = (int)health_service_sum_averaged(HealthMetricStepCount, start, end,
                                                                     HealthServiceTimeScopeDaily);
   } else {
     if(DEBUG) APP_LOG(APP_LOG_LEVEL_DEBUG, "No data available for daily average");
@@ -98,6 +100,12 @@ void data_init() {
   // Load resources
   s_green_shoe = gbitmap_create_with_resource(RESOURCE_ID_GREEN_SHOE_LOGO);
   s_blue_shoe = gbitmap_create_with_resource(RESOURCE_ID_BLUE_SHOE_LOGO);
+
+    sbmpBattery= gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY);
+    sbmpBatteryCharging= gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_CHARGER);
+    sbmpBle=gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLE);
+    sbmpBleN=gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLEN);
+
   s_font_small = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
   s_font_med = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   s_font_big = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
@@ -166,4 +174,17 @@ GBitmap* data_get_green_shoe() {
 
 char* data_get_current_steps_buffer() {
   return s_current_steps_buffer;
+}
+
+/// Added to support battery and BLE icons
+GBitmap* data_get_BLE(bool isConnected) {
+    if (isConnected) return sbmpBle;
+    else return sbmpBleN;
+
+}
+
+GBitmap* data_get_Battery(bool isCharging) {
+    if (isCharging) return sbmpBatteryCharging;
+    else return sbmpBattery;
+
 }

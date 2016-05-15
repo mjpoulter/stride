@@ -53,7 +53,7 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
   GPoint pt;
   pt.x=15;
   pt.y=15;
-  graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()));//bleConnected));
+  graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);//bleConnected));
   pt.x=15;
   pt.y=15;
 }
@@ -151,9 +151,27 @@ void main_window_redraw() {
 
 void main_window_update_ble(bool isConnected){
     bleConnected=isConnected;
+    layer_mark_dirty(s_canvas_layer);
 
 }
 void main_window_update_battery(bool isCharging,int charge){
     batteryCharging=isCharging;
     batteryLevel=charge;
+    layer_mark_dirty(s_canvas_layer);
+
+    //    if (battery.is_charging) {
+//        // graphics_draw_bitmap_in_rect(ctx, icon_battery_charge, GRect(0, 0, 24, 12));
+//        bitmap_layer_set_bitmap(sblBattery, sbmpBatteryCharging);
+//
+//    }
+//    else{
+//        bitmap_layer_set_bitmap(sblBattery, sbmpBattery);
+//    }
+//    //   graphics_draw_bitmap_in_rect(ctx, icon_battery, GRect(0, 0, 24, 12));
+//    //   graphics_context_set_stroke_color(ctx, GColorBlack);
+//    //   graphics_context_set_fill_color(ctx, GColorWhite);
+//    //   graphics_fill_rect(ctx, GRect(7, 4, (uint8_t)((battery_level / 100.0) * 11.0), 4), 0, GCornerNone);
+//    // } else {
+//
+//    // }
 }
