@@ -24,6 +24,11 @@
       },
       {
         "type": "png",
+        "name": "RED_SHOE_LOGO",
+        "file": "img/red_shoe.png"
+      },
+      {
+        "type": "png",
         "name": "GREEN_SHOE_LOGO",
         "file": "img/green_shoe.png"
       },
