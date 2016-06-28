@@ -20,35 +20,45 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   const int fill_thickness = PBL_IF_RECT_ELSE(12, (180 - grect_inset(bounds, GEdgeInsets(12)).size.h) / 2);
   int current_steps = data_get_current_steps();
-  int daily_average = data_get_daily_average();
-  int current_average = data_get_current_average();
-
+  int current_goal = getCurrentDailySteps();
+  int daily_goal = data_get_daily_goal();
+  // int daily_average = data_get_daily_average();
+  // int current_average = data_get_current_average();
   // Set new exceeded daily average
-  if(current_steps > daily_average) {
-    daily_average = current_steps;
-    data_set_daily_average(daily_average);
-  }
+  /// lets do extra turns
+  // if(current_steps > daily_average) {
+  //   daily_average = current_steps;
+  //   data_set_daily_average(daily_average);
+  // }
 
   // Decide color scheme based on progress to/past goal
   GColor scheme_color;
   GBitmap *bitmap;
   // Perform drawing
-    if(current_steps <= current_average) {
+  /// below average draw in red
+  // int current_goal = getCurrentDailySteps();
+    if(current_steps <= current_goal) {
         scheme_color  = GColorFromRGB(255, 0, 0);
+        bitmap = data_get_red_shoe();
+        graphics_fill_outer_ring(ctx, current_steps, fill_thickness, bounds, scheme_color);
+    }
+    /// above average go blue
+    else if(current_steps >= current_goal && current_steps <= daily_goal){
+        scheme_color  = GColorCobaltBlue;//FromRGB(255, 0, 0);
         bitmap = data_get_blue_shoe();
         graphics_fill_outer_ring(ctx, current_steps, fill_thickness, bounds, scheme_color);
     }
     else{
         scheme_color = GColorJaegerGreen;
         bitmap = data_get_green_shoe();
-        graphics_fill_outer_ring(ctx, data_get_daily_average(), fill_thickness, bounds,scheme_color );
-        graphics_fill_outer_ring(ctx, (current_steps-current_average), fill_thickness, bounds, GColorPictonBlue);
+        graphics_fill_outer_ring(ctx, daily_goal, fill_thickness, bounds,scheme_color );
+        graphics_fill_outer_ring(ctx, (current_steps-daily_goal), fill_thickness, bounds, GColorPictonBlue);
 
 
     }
 
   graphics_draw_outer_dots(ctx, bounds);
-  graphics_fill_goal_line(ctx, daily_average, 17, 4, bounds, GColorYellow);
+  graphics_fill_goal_line(ctx, /*daily_average current_goal,*/ 17, 4, bounds, GColorYellow);
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
   GPoint pt;
   pt.x=15;
@@ -134,9 +144,12 @@ void main_window_push() {
 }
 
 void main_window_update_time(struct tm* tick_time) {
+  /// set the current daily progress
+  setTimeOfDay(tick_time);
   strftime(s_current_time_buffer, sizeof(s_current_time_buffer),
     clock_is_24h_style() ? "%H:%M" : "%l:%M", tick_time);
-      /// Added tu support date 
+      /// Added to support date 
+      //tick_time->;
   snprintf(s_current_date_buffer, sizeof(s_current_date_buffer), "%s %d %s",
     s_day_names[tick_time->tm_wday], tick_time->tm_mday,s_month_names[ tick_time->tm_mon ]);
   layer_mark_dirty(s_text_layer);

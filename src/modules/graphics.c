@@ -132,8 +132,8 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
                                 int fill_thickness, GRect frame, GColor color) {
   graphics_context_set_fill_color(ctx, color);
 
-  const int day_average_steps = data_get_daily_average();
-  if(day_average_steps == 0) {
+  const int daily_goal = data_get_daily_goal();// data_get_daily_average();
+  if(daily_goal == 0) {
     // Do not draw
     return;
   }
@@ -141,9 +141,9 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
 #if defined(PBL_RECT)
   const GRect outer_bounds = frame;
 
-  const GPoint start_outer_point = steps_to_point(0, day_average_steps, outer_bounds);
+  const GPoint start_outer_point = steps_to_point(0, daily_goal, outer_bounds);
   const GPoint start_inner_point = inset_point(start_outer_point, fill_thickness);
-  const GPoint end_outer_point = steps_to_point(current_steps, day_average_steps, outer_bounds);
+  const GPoint end_outer_point = steps_to_point(current_steps, daily_goal, outer_bounds);
   const GPoint end_inner_point = inset_point(end_outer_point, fill_thickness);
 
   GPath path = (GPath) {
@@ -153,11 +153,11 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
 
   const int rect_perimeter = get_rect_perimeter();
   const int32_t corners[6] = {0,
-                        day_average_steps * TOP_RIGHT / rect_perimeter,
-                        day_average_steps * BOT_RIGHT / rect_perimeter,
-                        day_average_steps * BOT_LEFT / rect_perimeter,
-                        day_average_steps * TOP_LEFT / rect_perimeter,
-                        day_average_steps};
+                        daily_goal * TOP_RIGHT / rect_perimeter,
+                        daily_goal * BOT_RIGHT / rect_perimeter,
+                        daily_goal * BOT_LEFT / rect_perimeter,
+                        daily_goal * TOP_LEFT / rect_perimeter,
+                        daily_goal};
 
   // Start the path with start_outer_point
   path.points[path.num_points++] = start_outer_point;
@@ -165,7 +165,7 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
   // Loop through and add all the corners between start and end
   for(uint16_t i = 0; i < ARRAY_LENGTH(corners); i++) {
     if(corners[i] > 0 && corners[i] < current_steps) {
-      path.points[path.num_points++] = steps_to_point(corners[i], day_average_steps,
+      path.points[path.num_points++] = steps_to_point(corners[i], daily_goal,
                                                           outer_bounds);
     }
   }
@@ -177,7 +177,7 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
   for(int i = ARRAY_LENGTH(corners) - 1; i >= 0; i--) {
     if(corners[i] > 0 && corners[i] < current_steps) {
       path.points[path.num_points++] = inset_point(steps_to_point(corners[i],
-                                                                          day_average_steps,
+                                                                          daily_goal,
                                                                           outer_bounds),
                                                        fill_thickness);
     }
@@ -199,20 +199,25 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
 #elif defined(PBL_ROUND)
   graphics_fill_radial(ctx, frame, GOvalScaleModeFitCircle, fill_thickness,
                        DEG_TO_TRIGANGLE(0),
-                       DEG_TO_TRIGANGLE(360 * current_steps / day_average_steps));
+                       DEG_TO_TRIGANGLE(360 * current_steps / daily_goal));
 #endif
 }
-
-void graphics_fill_goal_line(GContext *ctx, int32_t day_average_steps,
+/// This method draws the yellow tick
+/// This should be current and goal
+void graphics_fill_goal_line(GContext *ctx, /*int32_t day_goal_steps,*/
                                 int line_length, int line_width, GRect frame, GColor color) {
-  const int current_average = data_get_current_average();
-  if(current_average == 0) {
-    // Do not draw
-    return;
-  }
+  /// double check this goal
+  // const int current = data_get_current_steps();
+  const int currentGoal = getCurrentDailySteps();
+  const int goal = data_get_daily_goal();
+  // if(current_average == 0) {
+  //   // Do not draw
+  //   return;
+  // }
 
   graphics_context_set_stroke_color(ctx, color);
-  const GPoint line_outer_point = steps_to_point(current_average, day_average_steps, frame);
+  /// This should be current and goal
+  const GPoint line_outer_point = steps_to_point(currentGoal, goal, frame);
 
 #if defined(PBL_RECT)
     GPoint line_inner_point = inset_point(line_outer_point, line_length);
