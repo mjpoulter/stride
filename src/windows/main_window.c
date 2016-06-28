@@ -22,21 +22,11 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
   int current_steps = data_get_current_steps();
   int current_goal = getCurrentDailySteps();
   int daily_goal = data_get_daily_goal();
-  // int daily_average = data_get_daily_average();
-  // int current_average = data_get_current_average();
-  // Set new exceeded daily average
-  /// lets do extra turns
-  // if(current_steps > daily_average) {
-  //   daily_average = current_steps;
-  //   data_set_daily_average(daily_average);
-  // }
-
-  // Decide color scheme based on progress to/past goal
   GColor scheme_color;
   GBitmap *bitmap;
+  // Decide color scheme based on progress to/past goal
   // Perform drawing
   /// below average draw in red
-  // int current_goal = getCurrentDailySteps();
     if(current_steps <= current_goal) {
         scheme_color  = GColorFromRGB(255, 0, 0);
         bitmap = data_get_red_shoe();
@@ -48,22 +38,21 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
         bitmap = data_get_blue_shoe();
         graphics_fill_outer_ring(ctx, current_steps, fill_thickness, bounds, scheme_color);
     }
+    /// Above daily goal go green
     else{
         scheme_color = GColorJaegerGreen;
         bitmap = data_get_green_shoe();
         graphics_fill_outer_ring(ctx, daily_goal, fill_thickness, bounds,scheme_color );
         graphics_fill_outer_ring(ctx, (current_steps-daily_goal), fill_thickness, bounds, GColorPictonBlue);
-
-
     }
 
   graphics_draw_outer_dots(ctx, bounds);
-  graphics_fill_goal_line(ctx, /*daily_average current_goal,*/ 17, 4, bounds, GColorYellow);
+  graphics_fill_goal_line(ctx, 17, 4, bounds, GColorYellow);
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
   GPoint pt;
   pt.x=15;
   pt.y=15;
-  graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);//bleConnected));
+  graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);
   pt.x=15;
   pt.y=15;
 }
@@ -74,7 +63,6 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
   const GFont font_med = data_get_font(FontSizeMedium);
   const GFont font_small = data_get_font(FontSizeSmall);
   const GFont font_large = data_get_font(FontSizeLarge);
-
   // Get total width
   int total_width = 0;
   GSize time_size = graphics_text_layout_get_content_size(
@@ -84,7 +72,6 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
     total_width += graphics_text_layout_get_content_size(
       "AM", font_med, layer_bounds, GTextOverflowModeWordWrap, GTextAlignmentLeft).w;
   }
-
   const int x_margin = (layer_bounds.size.w - total_width) / 2;
   const int y_margin = PBL_IF_RECT_ELSE(8, 2);
   const GRect time_rect = grect_inset(layer_bounds, GEdgeInsets(-y_margin, 0, 0, x_margin));
@@ -92,7 +79,6 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, s_current_time_buffer, font_large, time_rect,
                      GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
- 
  graphics_draw_text(ctx, s_current_date_buffer, font_small, date_rect,
                      GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   if(!clock_is_24h_style()) {
@@ -109,15 +95,12 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
 }
 
 /*********************************** Window ***********************************/
-
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect window_bounds = layer_get_bounds(window_layer);
-
   s_canvas_layer = layer_create(window_bounds);
   layer_set_update_proc(s_canvas_layer, progress_update_proc);
   layer_add_child(window_layer, s_canvas_layer);
-
   GEdgeInsets time_insets = GEdgeInsets(80, 0, 0, 0);
   s_text_layer = layer_create(grect_inset(window_bounds, time_insets));
   layer_set_update_proc(s_text_layer, text_update_proc);
@@ -127,7 +110,6 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   layer_destroy(s_canvas_layer);
   layer_destroy(s_text_layer);
-
   window_destroy(s_window);
 }
 
@@ -139,7 +121,6 @@ void main_window_push() {
     .unload = window_unload,
   });
   window_stack_push(s_window, true);
-
   graphics_set_window(s_window);
 }
 
@@ -148,9 +129,8 @@ void main_window_update_time(struct tm* tick_time) {
   setTimeOfDay(tick_time);
   strftime(s_current_time_buffer, sizeof(s_current_time_buffer),
     clock_is_24h_style() ? "%H:%M" : "%l:%M", tick_time);
-      /// Added to support date 
-      //tick_time->;
-  snprintf(s_current_date_buffer, sizeof(s_current_date_buffer), "%s %d %s",
+ /// Added to support date 
+ snprintf(s_current_date_buffer, sizeof(s_current_date_buffer), "%s %d %s",
     s_day_names[tick_time->tm_wday], tick_time->tm_mday,s_month_names[ tick_time->tm_mon ]);
   layer_mark_dirty(s_text_layer);
 }
@@ -165,26 +145,10 @@ void main_window_redraw() {
 void main_window_update_ble(bool isConnected){
     bleConnected=isConnected;
     layer_mark_dirty(s_canvas_layer);
-
 }
+
 void main_window_update_battery(bool isCharging,int charge){
     batteryCharging=isCharging;
     batteryLevel=charge;
     layer_mark_dirty(s_canvas_layer);
-
-    //    if (battery.is_charging) {
-//        // graphics_draw_bitmap_in_rect(ctx, icon_battery_charge, GRect(0, 0, 24, 12));
-//        bitmap_layer_set_bitmap(sblBattery, sbmpBatteryCharging);
-//
-//    }
-//    else{
-//        bitmap_layer_set_bitmap(sblBattery, sbmpBattery);
-//    }
-//    //   graphics_draw_bitmap_in_rect(ctx, icon_battery, GRect(0, 0, 24, 12));
-//    //   graphics_context_set_stroke_color(ctx, GColorBlack);
-//    //   graphics_context_set_fill_color(ctx, GColorWhite);
-//    //   graphics_fill_rect(ctx, GRect(7, 4, (uint8_t)((battery_level / 100.0) * 11.0), 4), 0, GCornerNone);
-//    // } else {
-//
-//    // }
 }

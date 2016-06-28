@@ -32,29 +32,12 @@ void hdlBle(bool state){
 
 void hdlBattery(BatteryChargeState battery){
     main_window_update_battery(battery.is_charging, battery.charge_percent);
-//    if (battery.is_charging) {
-//        // graphics_draw_bitmap_in_rect(ctx, icon_battery_charge, GRect(0, 0, 24, 12));
-//        bitmap_layer_set_bitmap(sblBattery, sbmpBatteryCharging);
-//
-//    }
-//    else{
-//        bitmap_layer_set_bitmap(sblBattery, sbmpBattery);
-//    }
-//    //   graphics_draw_bitmap_in_rect(ctx, icon_battery, GRect(0, 0, 24, 12));
-//    //   graphics_context_set_stroke_color(ctx, GColorBlack);
-//    //   graphics_context_set_fill_color(ctx, GColorWhite);
-//    //   graphics_fill_rect(ctx, GRect(7, 4, (uint8_t)((battery_level / 100.0) * 11.0), 4), 0, GCornerNone);
-//    // } else {
-//
-//    // }
-
 }
 
 void init() {
   data_init();
   health_init();
   main_window_push();
-  //bluetooth_connection_service_subscribe(&hdlBle);
   connection_service_subscribe((ConnectionHandlers) {
   .pebble_app_connection_handler = hdlBle,
   .pebblekit_connection_handler = hdlBle
