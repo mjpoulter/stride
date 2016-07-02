@@ -1,11 +1,11 @@
 {
   "uuid": "E4423BF0-C711-4331-B650-F3EDD23B5A35",
-  "shortName": "Analog stride",
-  "longName": "Analog stride",
+  "shortName": "Stride++",
+  "longName": "Stride++",
   "companyName": "Martin Diz",
   "versionLabel": "1",
   "sdkVersion": "3",
-  "targetPlatforms": ["basalt"],
+  "targetPlatforms": ["basalt", "chalck"],
   "watchapp": {
     "watchface": true
   },
