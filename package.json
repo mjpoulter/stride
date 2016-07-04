@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "author": "Martin Diz",
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.1"
+  },
+  "keywords": [
+    "pebble-app"
+  ],
+  "pebble": {
+    "sdkVersion": "3",
+    "resources": {
+      "media": [
+        {
+          "type": "png",
+          "name": "BLUE_SHOE_LOGO",
+          "file": "img/blue_shoe.png"
+        },
+        {
+          "type": "png",
+          "name": "RED_SHOE_LOGO",
+          "file": "img/red_shoe.png"
+        },
+        {
+          "type": "png",
+          "name": "GREEN_SHOE_LOGO",
+          "file": "img/green_shoe.png"
+        },
+        {
+          "type": "png",
+          "name": "IMAGE_BATTERY",
+          "file": "img/battery.png"
+        },
+        {
+          "type": "png",
+          "name": "IMAGE_BATTERY_CHARGER",
+          "file": "img/batteryCharger.png"
+        },
+        {
+          "type": "png",
+          "name": "IMAGE_BLE",
+          "file": "img/ble.png"
+        },
+        {
+          "type": "png",
+          "name": "IMAGE_BLEN",
+          "file": "img/bleN.png"
+        }
+      ]
+    },
+    "projectType": "native",
+    "uuid": "e4423bf0-c711-4331-b650-f3edd23b5a35",
+    "messageKeys": {
+      "dummy": 0,
+      "dailySteps": 14000
+    },
+    "enableMultiJS": true,
+    "displayName": "Stride++",
+    "watchapp": {
+      "onlyShownOnCommunication": false,
+      "hiddenApp": false,
+      "watchface": true
+    },
+    "targetPlatforms": [
+      "basalt",
+      "chalck"
+    ],
+    "capabilities": [
+      "health",
+      "configurable"
+    ]
+  },
+  "name": "Stride++"
+}
