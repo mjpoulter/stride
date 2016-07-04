@@ -31,3 +31,5 @@ GBitmap* data_get_Battery(bool isCharging);
 void setTimeOfDay(struct tm* tm);
 int getDailyStepsPercentage();
 int getCurrentDailySteps();
+void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
+bool drawDailyGoal();

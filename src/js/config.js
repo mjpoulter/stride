@@ -20,6 +20,12 @@ module.exports = [
         "defaultValue": "14000",
         "label": "Daily Steps Goal",
     },
+    {
+  "type": "toggle",
+  "messageKey": "goalTick",
+  "label": "Show daily goal tick",
+  "defaultValue": true
+},
         {
         "type": "input",
         "messageKey": "dailyStart",

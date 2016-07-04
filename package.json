@@ -53,7 +53,8 @@
     "uuid": "e4423bf0-c711-4331-b650-f3edd23b5a35",
     "messageKeys": {
       "dummy": 0,
-      "dailySteps": 14000
+      "dailySteps": 14000,
+      "goalTick":1
     },
     "enableMultiJS": true,
     "displayName": "Stride++",

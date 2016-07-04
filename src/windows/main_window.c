@@ -47,7 +47,7 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
     }
 
   graphics_draw_outer_dots(ctx, bounds);
-  graphics_fill_goal_line(ctx, 17, 4, bounds, GColorYellow);
+  if(drawDailyGoal()) graphics_fill_goal_line(ctx, 17, 4, bounds, GColorYellow);
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
   GPoint pt;
   pt.x=15;

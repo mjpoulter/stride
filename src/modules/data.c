@@ -19,6 +19,7 @@ static GFont s_font_small, s_font_big, s_font_med;
 static int s_current_steps;
 static char s_current_steps_buffer[8];
 static int dailyStepsPercentage;
+static bool flgDailyGoalShow=true;
 
 void data_update_steps_buffer() {
   int thousands = s_current_steps / 1000;
@@ -140,3 +141,13 @@ int getCurrentDailySteps(){
   // return data_get_daily_goal()*.25;
   return dailyStepsPercentage*data_get_daily_goal()/100.;
 }
+
+bool drawDailyGoal(){
+ return flgDailyGoalShow; 
+}
+  void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *daily_goal_tick = dict_find(iter, MESSAGE_KEY_goalTick);
+  if(daily_goal_tick) {
+    flgDailyGoalShow = daily_goal_tick->value->int32 == 1;
+  }
+};

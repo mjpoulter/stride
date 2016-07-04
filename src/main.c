@@ -45,6 +45,8 @@ void init() {
   battery_state_service_subscribe (&hdlBattery);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   hdlBattery(battery_state_service_peek());
+  app_message_register_inbox_received(prv_inbox_received_handler);
+  app_message_open(128, 128);
   main_window_update_time(util_get_tm());
 }
 
