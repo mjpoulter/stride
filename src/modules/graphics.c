@@ -223,7 +223,7 @@ void graphics_fill_goal_line(GContext *ctx, /*int32_t day_goal_steps,*/
     GPoint line_inner_point = inset_point(line_outer_point, line_length);
 #elif defined(PBL_ROUND)
     GRect inner_bounds = grect_inset(frame, GEdgeInsets(line_length));
-    GPoint line_inner_point = steps_to_point(current_average, day_average_steps, inner_bounds);
+    GPoint line_inner_point = steps_to_point(currentGoal, goal, inner_bounds);
 #endif
 
   graphics_context_set_stroke_width(ctx, line_width);
@@ -264,7 +264,11 @@ void graphics_draw_status_icons(GContext *ctx, GPoint xy,GBitmap* bitmapBaterry,
     bleBox.origin=xy;
     /// Screen width 144
     /// Should be right aligned with 15 px margin
+#if defined(PBL_RECT)
     xy.x=140-15-batteryBox.size.w;
+#elif defined(PBL_ROUND)
+        xy.x=140-20-batteryBox.size.w;
+#endif
     batteryBox.origin=xy;
     graphics_draw_bitmap_in_rect(ctx,bitmapBLE,bleBox);
      APP_LOG(APP_LOG_LEVEL_DEBUG, "BLE box is in (%d,%d) with siz (%d,%d)",

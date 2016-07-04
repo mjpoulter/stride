@@ -51,7 +51,11 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
   GPoint pt;
   pt.x=15;
-  pt.y=15;
+  #if defined(PBL_RECT)
+    pt.y=15;
+  #elif defined(PBL_ROUND)
+     pt.y=20;
+  #endif
   graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);
   pt.x=15;
   pt.y=15;
@@ -75,7 +79,11 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
   const int x_margin = (layer_bounds.size.w - total_width) / 2;
   const int y_margin = PBL_IF_RECT_ELSE(8, 2);
   const GRect time_rect = grect_inset(layer_bounds, GEdgeInsets(-y_margin, 0, 0, x_margin));
+#if defined(PBL_RECT)
   const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+10, 0, 0, x_margin+3));  
+#elif defined(PBL_ROUND)
+  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+22, 0, 0, x_margin+9));  
+#endif
   graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, s_current_time_buffer, font_large, time_rect,
                      GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
