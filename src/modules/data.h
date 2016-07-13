@@ -33,3 +33,5 @@ int getDailyStepsPercentage();
 int getCurrentDailySteps();
 void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
 bool drawDailyGoal();
+void getHourAndMinutes(char* buffer,int *hr,int *min);
+void storeRootWindow(Window* win);

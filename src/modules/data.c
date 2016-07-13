@@ -15,11 +15,19 @@ typedef enum {
 static GBitmap *s_blue_shoe, *s_red_shoe,*s_green_shoe, *sbmpBleN,*sbmpBle,*sbmpBatteryCharging,*sbmpBattery;
 
 static GFont s_font_small, s_font_big, s_font_med;
-
+static Window *win;
 static int s_current_steps;
 static char s_current_steps_buffer[8];
 static int dailyStepsPercentage;
 static bool flgDailyGoalShow=true;
+static int dailyGoal=14000;
+static struct {
+  int startHr;
+  int startMin;
+  int endHr;
+  int endMin;
+  int walkTime;
+} stDailyGoal;
 
 void data_update_steps_buffer() {
   int thousands = s_current_steps / 1000;
@@ -33,7 +41,7 @@ void data_update_steps_buffer() {
 }
 
 static void load_health_data_handler(void *context) {
-  const struct tm *time_now = util_get_tm();
+  // const struct tm *time_now = util_get_tm();
   s_current_steps = health_service_sum_today(HealthMetricStepCount);
   persist_write_int(AppKeyCurrentSteps, s_current_steps);
   data_update_steps_buffer();
@@ -64,6 +72,12 @@ void data_init() {
   data_update_steps_buffer();
   // Avoid half-second delay loading the app by delaying API read
   data_reload_averages();
+
+  stDailyGoal.startHr=8;
+  stDailyGoal.startMin=0;
+  stDailyGoal.endHr=24;
+  stDailyGoal.endMin=0;
+  stDailyGoal.walkTime=16*60;
 }
 
 void data_deinit() {
@@ -79,7 +93,7 @@ int data_get_current_steps() {
 }
 
 int data_get_daily_goal() {
-  return 14000;
+  return dailyGoal;
 }
 
 void data_set_current_steps(int value) {
@@ -124,12 +138,24 @@ GBitmap* data_get_Battery(bool isCharging) {
 
 void setTimeOfDay(struct tm* tm){
   /// start the walking day at 8 am
-  if(tm->tm_hour<8){
+  if(tm->tm_hour<stDailyGoal.startHr){
     dailyStepsPercentage=0;
   }
-  else{
-    dailyStepsPercentage = 100.*(tm->tm_hour-8+tm->tm_min/60.)/16.;
+  else if(tm->tm_hour==stDailyGoal.startHr && tm->tm_min<stDailyGoal.startMin){
+      dailyStepsPercentage=0;
   }
+  else if(tm->tm_hour>stDailyGoal.endHr){
+    dailyStepsPercentage=100;
+  }
+  else if(tm->tm_hour==stDailyGoal.endHr && tm->tm_min>stDailyGoal.endMin){
+    dailyStepsPercentage=100;
+  }
+  else{
+     APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d end %d:%d",stDailyGoal.startHr,stDailyGoal.startMin,stDailyGoal.endHr,stDailyGoal.endMin);
+     APP_LOG(APP_LOG_LEVEL_DEBUG,"Hr Diff %d, min diff %d, wt %d",tm->tm_hour-stDailyGoal.startHr,+tm->tm_min,stDailyGoal.walkTime);
+     dailyStepsPercentage = 100.*((tm->tm_hour-stDailyGoal.startHr)*60.+tm->tm_min)/(stDailyGoal.walkTime);
+  }
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "daily steps percentage is (%d)\n",dailyStepsPercentage);
 }
 
 int getDailyStepsPercentage(){
@@ -145,9 +171,50 @@ int getCurrentDailySteps(){
 bool drawDailyGoal(){
  return flgDailyGoalShow; 
 }
-  void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+
+ void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Config menu");
   Tuple *daily_goal_tick = dict_find(iter, MESSAGE_KEY_goalTick);
+  Tuple *daily_goal_steps = dict_find(iter, MESSAGE_KEY_dailySteps);
+  Tuple *daily_goal_start = dict_find(iter, MESSAGE_KEY_dailyStart);
+  Tuple *daily_goal_end = dict_find(iter, MESSAGE_KEY_dailyEnd);
+
   if(daily_goal_tick) {
     flgDailyGoalShow = daily_goal_tick->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG,flgDailyGoalShow?"Daily goal true":"Daily goal false");
   }
+  if(daily_goal_steps) {
+    dailyGoal = daily_goal_steps->value->int32 ;
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal :%d",atoi(daily_goal_steps->value->cstring));
+  }
+  if(daily_goal_start){
+    getHourAndMinutes(daily_goal_start->value->cstring ,&stDailyGoal.startHr,&stDailyGoal.startMin);
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d",stDailyGoal.startHr,stDailyGoal.startMin);
+  }
+  else APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start NA");
+  if(daily_goal_end){
+    getHourAndMinutes(daily_goal_end->value->cstring ,&stDailyGoal.endHr,&stDailyGoal.endMin);
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end (%s) %d:%d",daily_goal_end->value->cstring,stDailyGoal.endHr,stDailyGoal.endMin);
+  } 
+  else APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end NA");
+  /// review minutes and midnight
+  stDailyGoal.walkTime=(stDailyGoal.endHr-stDailyGoal.startHr)*60+(stDailyGoal.endMin-stDailyGoal.startMin);
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"Walktime %d",stDailyGoal.walkTime);
+  /// redraw this should be move to main
+  main_window_redraw();
+  layer_mark_dirty(window_get_root_layer(win));
 };
+
+void getHourAndMinutes(char* buffer,int *hr,int *min){
+  char number[3]={'\0','\0','\0'};
+  number[0]=buffer[0];
+  number[1]=buffer[1];
+  *hr=atoi(number);
+  number[0]=buffer[3];
+  number[1]=buffer[4];
+  *min=atoi(number);
+}
+
+void storeRootWindow(Window* w){
+  win=w;
+}

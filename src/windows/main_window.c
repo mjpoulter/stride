@@ -130,6 +130,7 @@ void main_window_push() {
   });
   window_stack_push(s_window, true);
   graphics_set_window(s_window);
+  storeRootWindow(s_window);
 }
 
 void main_window_update_time(struct tm* tick_time) {

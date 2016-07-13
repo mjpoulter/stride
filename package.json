@@ -52,9 +52,11 @@
     "projectType": "native",
     "uuid": "e4423bf0-c711-4331-b650-f3edd23b5a35",
     "messageKeys": {
-      "dummy": 0,
       "dailySteps": 14000,
-      "goalTick":1
+      "goalTick":1,
+      "dailyStart":0,
+      "dailyEnd":12000
+
     },
     "enableMultiJS": true,
     "displayName": "Stride++",
@@ -65,7 +67,7 @@
     },
     "targetPlatforms": [
       "basalt",
-      "chalk"
+      "chalk."
     ],
     "capabilities": [
       "health",
