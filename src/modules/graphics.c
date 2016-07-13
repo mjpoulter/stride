@@ -271,11 +271,7 @@ void graphics_draw_status_icons(GContext *ctx, GPoint xy,GBitmap* bitmapBaterry,
 #endif
     batteryBox.origin=xy;
     graphics_draw_bitmap_in_rect(ctx,bitmapBLE,bleBox);
-     APP_LOG(APP_LOG_LEVEL_DEBUG, "BLE box is in (%d,%d) with siz (%d,%d)",
-   bleBox.origin.x,bleBox.origin.y,bleBox.size.w,bleBox.size.h);
     graphics_draw_bitmap_in_rect(ctx,bitmapBaterry,batteryBox);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "BLE box is in (%d,%d) with siz (%d,%d)",
-    batteryBox.origin.x,batteryBox.origin.y,batteryBox.size.w,batteryBox.size.h);
     graphics_context_set_fill_color(ctx, GColorGreen);
     graphics_fill_rect(ctx, GRect(batteryBox.origin.x+7, batteryBox.origin.y+4, (uint8_t)((charge / 100.0) * 11.0), 4), 0, GCornerNone);
 
