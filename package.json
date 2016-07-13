@@ -67,7 +67,7 @@
     },
     "targetPlatforms": [
       "basalt",
-      "chalk."
+      "chalk"
     ],
     "capabilities": [
       "health",
