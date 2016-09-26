@@ -1,9 +1,16 @@
 #include "graphics.h"
 
+#if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_BASALT) || defined(PBL_PLATFORM_CHALK) || defined (PBL_PLATFORM_DIORITE)
 #define TOP_RIGHT 72
 #define BOT_RIGHT 240
 #define BOT_LEFT  384
 #define TOP_LEFT  552
+#else
+#define TOP_RIGHT 72
+#define BOT_RIGHT 240
+#define BOT_LEFT  384
+#define TOP_LEFT  552
+#endif
 
 #define MULT_X(a, b) (1000 * a / b)
 #define DIV_X(a) (a / 1000)
@@ -131,7 +138,10 @@ void graphics_draw_outer_dots(GContext *ctx, GRect bounds) {
 void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
                                 int fill_thickness, GRect frame, GColor color) {
   graphics_context_set_fill_color(ctx, color);
-
+#if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
+/// Override color
+color = GColorWhite ;
+#endif // PBL_
   const int daily_goal = data_get_daily_goal();// data_get_daily_average();
   if(daily_goal == 0) {
     // Do not draw
@@ -249,6 +259,10 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
   shoe_bitmap_box.origin.x = (bounds.size.w / 2) + (combined_width / 2) - shoe_bitmap_box.size.w;
   shoe_bitmap_box.origin.y = PBL_IF_RECT_ELSE(60, 65);
 
+#if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
+/// Override color
+color = GColorWhite ;
+#endif // PBL_
   graphics_context_set_text_color(ctx, color);
   graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeSmall),
                      steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);

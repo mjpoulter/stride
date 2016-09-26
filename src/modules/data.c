@@ -53,9 +53,16 @@ void data_reload_averages() {
 
 void data_init() {
   // Load resources
+  /// @TODO: Quick patch. We need to do a refactor to have a more neat image managing
+  #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
+  s_green_shoe = gbitmap_create_with_resource(RESOURCE_ID_WHITE_SHOE_LOGO);
+  s_blue_shoe = s_green_shoe;
+  s_red_shoe = s_green_shoe;
+  #else
   s_green_shoe = gbitmap_create_with_resource(RESOURCE_ID_GREEN_SHOE_LOGO);
   s_blue_shoe = gbitmap_create_with_resource(RESOURCE_ID_BLUE_SHOE_LOGO);
   s_red_shoe = gbitmap_create_with_resource(RESOURCE_ID_RED_SHOE_LOGO);
+  #endif
   sbmpBattery= gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY);
   sbmpBatteryCharging= gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_CHARGER);
   sbmpBle=gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLE);
@@ -88,7 +95,7 @@ void data_deinit() {
 
 int data_get_current_steps() {
   /// Debug
-  // return 12000;
+  //return 16000;
   return s_current_steps;
 }
 
@@ -163,7 +170,6 @@ int getDailyStepsPercentage(){
 }
 
 int getCurrentDailySteps(){
-  // Debug
   // return data_get_daily_goal()*.25;
   return dailyStepsPercentage*data_get_daily_goal()/100.;
 }
