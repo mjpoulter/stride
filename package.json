@@ -12,6 +12,11 @@
     "sdkVersion": "3",
     "resources": {
       "media": [
+                {
+          "type": "png",
+          "name": "WHITE_SHOE_LOGO",
+          "file": "img/white_shoe.png"
+        },
         {
           "type": "png",
           "name": "BLUE_SHOE_LOGO",
@@ -66,8 +71,11 @@
       "watchface": true
     },
     "targetPlatforms": [
+      "aplite",
       "basalt",
-      "chalk"
+      "chalk",
+      "diorite",
+      "emery"
     ],
     "capabilities": [
       "health",
