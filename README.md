@@ -14,5 +14,8 @@ This watchface is a "enhanced" version of pebble [Stride](https://apps.getpebble
 ## Peble
 ![Above complete](storeInfo/screenshots/aplite/aboveComplete.png)![Below complete](storeInfo/screenshots/aplite/belowComplete.png)
 
+You need to add weather support before the App can be compile. Run the following command in the terminal
 
-The code is based on [Mitchell Roy](mailto:mitchell@pabble.com) and [Chris Lewis](mailto:Bonsitm@gmail.com) [health-watchface](https://github.com/pebble-examples/health-watchface.git). Health-watchface is a reference copy of the official pebble Stride health watchface. 
+```$pebble package install pebble-generic-weathe```
+
+The code is based on [Mitchell Roy](mailto:mitchell@pabble.com) and [Chris Lewis](mailto:Bonsitm@gmail.com) [health-watchface](https://github.com/pebble-examples/health-watchface.git). Health-watchface is a reference copy of the official pebble Stride health watchface.

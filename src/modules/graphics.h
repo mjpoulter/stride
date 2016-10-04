@@ -17,4 +17,5 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
 void graphics_set_window(Window *window);
 
 void graphics_draw_status_icons(GContext *ctx, GPoint cx,GBitmap* bitmapBaterry,GBitmap*bitmapBLE,unsigned int charge);
- 
+
+void graphics_draw_weather(GContext *ctx, GRect bounds, GColor color, GBitmap *bitmap);

@@ -3,7 +3,8 @@
   "author": "Martin Diz",
   "private": true,
   "dependencies": {
-    "pebble-clay": "^1.0.1"
+    "pebble-clay": "^1.0.1",
+    "pebble-generic-weather": "^1.1.4"
   },
   "keywords": [
     "pebble-app"
@@ -12,7 +13,7 @@
     "sdkVersion": "3",
     "resources": {
       "media": [
-                {
+        {
           "type": "png",
           "name": "WHITE_SHOE_LOGO",
           "file": "img/white_shoe.png"
@@ -58,10 +59,10 @@
     "uuid": "e4423bf0-c711-4331-b650-f3edd23b5a35",
     "messageKeys": {
       "dailySteps": 14000,
-      "goalTick":1,
-      "dailyStart":0,
-      "dailyEnd":12000
-
+      "goalTick": 1,
+      "dailyStart": 0,
+      "dailyEnd": 12000,
+      "JSReady": 0
     },
     "enableMultiJS": true,
     "displayName": "Stride++",
@@ -71,11 +72,11 @@
       "watchface": true
     },
     "targetPlatforms": [
-      "aplite",
+      "aplite*",
       "basalt",
       "chalk",
-      "diorite",
-      "emery"
+      "diorite*",
+      "emery*"
     ],
     "capabilities": [
       "health",

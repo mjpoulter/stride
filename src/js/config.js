@@ -47,14 +47,11 @@ module.exports = [
         "limit": 6,
         "type": "time"
     }
-            }
-
-
-    
+            }    
     ]
   },
   {
     "type": "submit",
     "defaultValue": "Save Settings"
   }
-];
+]

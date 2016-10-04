@@ -16,6 +16,7 @@ static GBitmap *s_blue_shoe, *s_red_shoe,*s_green_shoe, *sbmpBleN,*sbmpBle,*sbmp
 
 static GFont s_font_small, s_font_big, s_font_med;
 static Window *win;
+static int temp;
 static int s_current_steps;
 static char s_current_steps_buffer[8];
 static int dailyStepsPercentage;
@@ -52,6 +53,11 @@ void data_reload_averages() {
 }
 
 void data_init() {
+  /// Init Communication
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"data_init");
+  app_message_open(128, 128);
+  app_message_register_inbox_received(prv_inbox_received_handler);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
   // Load resources
   /// @TODO: Quick patch. We need to do a refactor to have a more neat image managing
   #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
@@ -158,11 +164,11 @@ void setTimeOfDay(struct tm* tm){
     dailyStepsPercentage=100;
   }
   else{
-     APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d end %d:%d",stDailyGoal.startHr,stDailyGoal.startMin,stDailyGoal.endHr,stDailyGoal.endMin);
-     APP_LOG(APP_LOG_LEVEL_DEBUG,"Hr Diff %d, min diff %d, wt %d",tm->tm_hour-stDailyGoal.startHr,+tm->tm_min,stDailyGoal.walkTime);
+     //APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d end %d:%d",stDailyGoal.startHr,stDailyGoal.startMin,stDailyGoal.endHr,stDailyGoal.endMin);
+     //APP_LOG(APP_LOG_LEVEL_DEBUG,"Hr Diff %d, min diff %d, wt %d",tm->tm_hour-stDailyGoal.startHr,+tm->tm_min,stDailyGoal.walkTime);
      dailyStepsPercentage = 100.*((tm->tm_hour-stDailyGoal.startHr)*60.+tm->tm_min)/(stDailyGoal.walkTime);
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "daily steps percentage is (%d)\n",dailyStepsPercentage);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "daily steps percentage is (%d)\n",dailyStepsPercentage);
 }
 
 int getDailyStepsPercentage(){
@@ -178,13 +184,25 @@ bool drawDailyGoal(){
  return flgDailyGoalShow; 
 }
 
- void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Config menu");
+void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Message received");
+  Tuple *comm_ready = dict_find(iter, MESSAGE_KEY_JSReady);
   Tuple *daily_goal_tick = dict_find(iter, MESSAGE_KEY_goalTick);
   Tuple *daily_goal_steps = dict_find(iter, MESSAGE_KEY_dailySteps);
   Tuple *daily_goal_start = dict_find(iter, MESSAGE_KEY_dailyStart);
   Tuple *daily_goal_end = dict_find(iter, MESSAGE_KEY_dailyEnd);
-
+  if(comm_ready) {
+    bool flgComm_ready = comm_ready->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG,flgComm_ready?"Comm ready":"Comm not ready");
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather init");
+    weather_init();
+    if(generic_weather_fetch(&weather_callback)){
+      APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetched!");
+    }
+    else{
+      APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetch fail!");
+    }
+  }
   if(daily_goal_tick) {
     flgDailyGoalShow = daily_goal_tick->value->int32 == 1;
     APP_LOG(APP_LOG_LEVEL_DEBUG,flgDailyGoalShow?"Daily goal true":"Daily goal false");
@@ -211,6 +229,11 @@ bool drawDailyGoal(){
   layer_mark_dirty(window_get_root_layer(win));
 };
 
+void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  // A message was received, but had to be dropped
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped. Reason: %d", (int)reason);
+}
+
 void getHourAndMinutes(char* buffer,int *hr,int *min){
   char number[3]={'\0','\0','\0'};
   number[0]=buffer[0];
@@ -223,4 +246,28 @@ void getHourAndMinutes(char* buffer,int *hr,int *min){
 
 void storeRootWindow(Window* w){
   win=w;
+}
+
+void weather_init(){
+    generic_weather_init();
+    generic_weather_set_provider(GenericWeatherProviderOpenWeatherMap);
+    generic_weather_set_api_key("5203d95b1a7973943dee2ca61eb050f9");
+    generic_weather_set_feels_like(false); 
+}
+void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status){
+        
+        switch (status){
+          case GenericWeatherStatusAvailable:
+          APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather ready [%d]",info->temp_c);
+          temp = info->temp_c;
+          break;
+        default:
+          APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather not ready");
+          temp = -278;
+          break;
+        }
+}
+
+int data_get_temp(){
+  return temp;
 }
