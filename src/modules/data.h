@@ -5,6 +5,7 @@
 #include "../config.h"
 #include "../modules/util.h"
 #include "../windows/main_window.h"
+#include <pebble-generic-weather/pebble-generic-weather.h>
 
 typedef enum {
   FontSizeSmall = 0,
@@ -18,6 +19,7 @@ int data_get_current_steps();
 void data_set_current_steps(int value);
 void data_set_current_average(int value); 
 int data_get_daily_goal();
+int data_get_temp();
 void data_reload_averages();
 GFont data_get_font(FontSize size);
 GBitmap* data_get_blue_shoe();
@@ -32,6 +34,10 @@ void setTimeOfDay(struct tm* tm);
 int getDailyStepsPercentage();
 int getCurrentDailySteps();
 void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
+void inbox_dropped_callback(AppMessageResult reason, void *context) ;
+
 bool drawDailyGoal();
 void getHourAndMinutes(char* buffer,int *hr,int *min);
 void storeRootWindow(Window* win);
+void weather_init();
+void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status);

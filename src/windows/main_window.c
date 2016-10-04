@@ -48,17 +48,23 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
 
   graphics_draw_outer_dots(ctx, bounds);
   if(drawDailyGoal()) graphics_fill_goal_line(ctx, 17, 4, bounds, GColorYellow);
+  
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
   GPoint pt;
   pt.x=15;
   #if defined(PBL_RECT)
     pt.y=15;
+      const GRect weather_rect = grect_inset(bounds, GEdgeInsets(bounds.size.h/2-55, 0, 0, 0));  
   #elif defined(PBL_ROUND)
      pt.y=20;
+    const GRect weather_rect = grect_inset(bounds, GEdgeInsets(bounds.size.h/2-55, 0, 0, 0));  
+
   #endif
   graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);
   pt.x=15;
   pt.y=15;
+    /// draw weather
+  graphics_draw_weather(ctx, weather_rect, GColorWhite, NULL);
 }
 
 static void text_update_proc(Layer *layer, GContext *ctx) {
@@ -80,9 +86,9 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
   const int y_margin = PBL_IF_RECT_ELSE(8, 2);
   const GRect time_rect = grect_inset(layer_bounds, GEdgeInsets(-y_margin, 0, 0, x_margin));
 #if defined(PBL_RECT)
-  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+10, 0, 0, x_margin+3));  
+  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+10, 0, 0, x_margin+3));
 #elif defined(PBL_ROUND)
-  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+22, 0, 0, x_margin+9));  
+  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+22, 0, 0, x_margin+9));
 #endif
   graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, s_current_time_buffer, font_large, time_rect,
@@ -100,6 +106,7 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_text(ctx, am ? "AM" : "PM", font_med, period_rect,
                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   } 
+
 }
 
 /*********************************** Window ***********************************/
