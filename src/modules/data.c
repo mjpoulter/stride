@@ -1,4 +1,5 @@
 #include "data.h"
+#include <pebble-events/pebble-events.h>
 
 typedef enum {
   AppKeyCurrentAverage = 0,
@@ -21,6 +22,9 @@ static int s_current_steps;
 static char s_current_steps_buffer[8];
 static int dailyStepsPercentage;
 static bool flgDailyGoalShow=true;
+static bool flgWeatherShow = true;
+static bool flgWeatherTemperature = true;
+static bool flgWeatherCelcius = true;
 static int dailyGoal=14000;
 static struct {
   int startHr;
@@ -55,9 +59,11 @@ void data_reload_averages() {
 void data_init() {
   /// Init Communication
   APP_LOG(APP_LOG_LEVEL_DEBUG,"data_init");
-  app_message_open(128, 128);
-  app_message_register_inbox_received(prv_inbox_received_handler);
-  app_message_register_inbox_dropped(inbox_dropped_callback);
+  /// Weather init opens communication
+  generic_weather_init();
+  /// We register to the inbox after the weather initialize everything
+  events_app_message_register_inbox_received(prv_inbox_received_handler,NULL);
+  events_app_message_register_inbox_dropped(inbox_dropped_callback,NULL);
   // Load resources
   /// @TODO: Quick patch. We need to do a refactor to have a more neat image managing
   #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
@@ -187,26 +193,38 @@ bool drawDailyGoal(){
 void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Message received");
   Tuple *comm_ready = dict_find(iter, MESSAGE_KEY_JSReady);
+  
+  Tuple *weather_units = dict_find(iter, MESSAGE_KEY_tempUnits);
+  Tuple *weather_temp = dict_find(iter, MESSAGE_KEY_showTemp);
+  Tuple *weather_show = dict_find(iter, MESSAGE_KEY_showWeather);
+  
   Tuple *daily_goal_tick = dict_find(iter, MESSAGE_KEY_goalTick);
   Tuple *daily_goal_steps = dict_find(iter, MESSAGE_KEY_dailySteps);
   Tuple *daily_goal_start = dict_find(iter, MESSAGE_KEY_dailyStart);
   Tuple *daily_goal_end = dict_find(iter, MESSAGE_KEY_dailyEnd);
+  
   if(comm_ready) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"[%ld][%ld][%ld][%ld]",MESSAGE_KEY_showWeather,MESSAGE_KEY_tempUnits,MESSAGE_KEY_showTemp,MESSAGE_KEY_goalTick);
     bool flgComm_ready = comm_ready->value->int32 == 1;
     APP_LOG(APP_LOG_LEVEL_DEBUG,flgComm_ready?"Comm ready":"Comm not ready");
-    APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather init");
-    weather_init();
-    if(generic_weather_fetch(&weather_callback)){
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetched!");
-    }
-    else{
-      APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetch fail!");
+    if (flgComm_ready){
+      APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather init");
+      weather_init();
+      if(generic_weather_fetch(&weather_callback)){
+        APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetched!");
+      }
+      else{
+        APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetch fail!");
+      }
     }
   }
+
+  
   if(daily_goal_tick) {
     flgDailyGoalShow = daily_goal_tick->value->int32 == 1;
     APP_LOG(APP_LOG_LEVEL_DEBUG,flgDailyGoalShow?"Daily goal true":"Daily goal false");
   }
+  
   if(daily_goal_steps) {
     dailyGoal = daily_goal_steps->value->int32 ;
     APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal :%d",atoi(daily_goal_steps->value->cstring));
@@ -215,15 +233,24 @@ void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
     getHourAndMinutes(daily_goal_start->value->cstring ,&stDailyGoal.startHr,&stDailyGoal.startMin);
     APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d",stDailyGoal.startHr,stDailyGoal.startMin);
   }
-  else APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start NA");
   if(daily_goal_end){
     getHourAndMinutes(daily_goal_end->value->cstring ,&stDailyGoal.endHr,&stDailyGoal.endMin);
     APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end (%s) %d:%d",daily_goal_end->value->cstring,stDailyGoal.endHr,stDailyGoal.endMin);
   } 
-  else APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end NA");
+  if(weather_units){
+    flgWeatherCelcius = (weather_units->value->int8 == 'c');
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Use celcius:[%s],[%u],[%c]",flgWeatherCelcius?"YES":"NO",weather_units->value->uint8,weather_units->value->uint8);
+  } 
+  if(weather_temp){
+    flgWeatherTemperature = (weather_temp->value->int32 == 1);
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Show temperature:[%s]",flgWeatherTemperature?"YES":"NO");
+  } 
+  if(weather_show){
+    flgWeatherShow = (weather_show->value->int32 == 1);
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"Show weather:[%s]",flgWeatherShow?"YES":"NO");
+  } 
   /// review minutes and midnight
   stDailyGoal.walkTime=(stDailyGoal.endHr-stDailyGoal.startHr)*60+(stDailyGoal.endMin-stDailyGoal.startMin);
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Walktime %d",stDailyGoal.walkTime);
   /// redraw this should be move to main
   main_window_redraw();
   layer_mark_dirty(window_get_root_layer(win));
@@ -249,7 +276,7 @@ void storeRootWindow(Window* w){
 }
 
 void weather_init(){
-    generic_weather_init();
+    //generic_weather_init();
     generic_weather_set_provider(GenericWeatherProviderOpenWeatherMap);
     generic_weather_set_api_key("5203d95b1a7973943dee2ca61eb050f9");
     generic_weather_set_feels_like(false); 
