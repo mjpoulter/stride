@@ -1,4 +1,5 @@
 #include "data.h"
+#include <pebble-events/pebble-events.h>
 
 typedef enum {
   AppKeyCurrentAverage = 0,
@@ -58,9 +59,11 @@ void data_reload_averages() {
 void data_init() {
   /// Init Communication
   APP_LOG(APP_LOG_LEVEL_DEBUG,"data_init");
-  app_message_open(128, 128);
-  app_message_register_inbox_received(prv_inbox_received_handler);
-  app_message_register_inbox_dropped(inbox_dropped_callback);
+  /// Weather init opens communication
+  generic_weather_init();
+  /// We register to the inbox after the weather initialize everything
+  events_app_message_register_inbox_received(prv_inbox_received_handler,NULL);
+  events_app_message_register_inbox_dropped(inbox_dropped_callback,NULL);
   // Load resources
   /// @TODO: Quick patch. We need to do a refactor to have a more neat image managing
   #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
@@ -273,7 +276,7 @@ void storeRootWindow(Window* w){
 }
 
 void weather_init(){
-    generic_weather_init();
+    //generic_weather_init();
     generic_weather_set_provider(GenericWeatherProviderOpenWeatherMap);
     generic_weather_set_api_key("5203d95b1a7973943dee2ca61eb050f9");
     generic_weather_set_feels_like(false); 
