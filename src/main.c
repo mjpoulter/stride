@@ -35,7 +35,8 @@ void hdlBattery(BatteryChargeState battery){
 }
 
 void init() {
-  data_init();
+ data_init();
+config_init();
  health_init();
  events_app_message_open();
   main_window_push();

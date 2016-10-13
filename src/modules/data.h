@@ -2,10 +2,12 @@
 
 #include <pebble.h>
 
-#include "../config.h"
-#include "../modules/util.h"
+// #include "config.h"
+#include "util.h"
 #include "../windows/main_window.h"
 #include <pebble-generic-weather/pebble-generic-weather.h>
+
+#define LOAD_DATA_DELAY 0
 
 typedef enum {
   FontSizeSmall = 0,
@@ -18,7 +20,7 @@ void data_deinit();
 int data_get_current_steps();
 void data_set_current_steps(int value);
 void data_set_current_average(int value); 
-int data_get_daily_goal();
+// int data_get_daily_goal();
 int data_get_temp();
 void data_reload_averages();
 GFont data_get_font(FontSize size);
@@ -30,14 +32,13 @@ char* data_get_current_steps_buffer();
 /// Added to support BLE and Battery Icon
 GBitmap* data_get_BLE(bool isConnected) ;
 GBitmap* data_get_Battery(bool isCharging);
-void setTimeOfDay(struct tm* tm);
-int getDailyStepsPercentage();
-int getCurrentDailySteps();
+// void setTimeOfDay(struct tm* tm);
+// int getDailyStepsPercentage();
+// int getCurrentDailySteps();
 void prv_inbox_received_handler(DictionaryIterator *iter, void *context);
 void inbox_dropped_callback(AppMessageResult reason, void *context) ;
 
-bool drawDailyGoal();
-void getHourAndMinutes(char* buffer,int *hr,int *min);
+// void getHourAndMinutes(char* buffer,int *hr,int *min);
 void storeRootWindow(Window* win);
 void weather_init();
 void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status);

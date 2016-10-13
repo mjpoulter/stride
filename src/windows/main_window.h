@@ -5,6 +5,7 @@
 #include "../modules/data.h"
 #include "../modules/graphics.h"
 #include "../modules/util.h"
+#include "../modules/config.h"
 
 void main_window_push();
 void main_window_update_time(struct tm* tick_time);
