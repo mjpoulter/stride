@@ -2,8 +2,8 @@
 
 #include <pebble.h>
 
-#include "../config.h"
-#include "../modules/util.h"
+#include "config.h"
+#include "util.h"
 #include "../windows/main_window.h"
 #include <pebble-generic-weather/pebble-generic-weather.h>
 
