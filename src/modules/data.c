@@ -34,7 +34,6 @@ void data_update_steps_buffer() {
 }
 
 static void load_health_data_handler(void *context) {
-  // const struct tm *time_now = util_get_tm();
   s_current_steps = health_service_sum_today(HealthMetricStepCount);
   persist_write_int(AppKeyCurrentSteps, s_current_steps);
   data_update_steps_buffer();
@@ -54,7 +53,6 @@ void data_init() {
   events_app_message_register_inbox_received(prv_inbox_received_handler,NULL);
   events_app_message_register_inbox_dropped(inbox_dropped_callback,NULL);
   // Load resources
-  /// @TODO: Quick patch. We need to do a refactor to have a more neat image managing
   #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
   s_green_shoe = gbitmap_create_with_resource(RESOURCE_ID_WHITE_SHOE_LOGO);
   s_blue_shoe = s_green_shoe;
@@ -91,13 +89,9 @@ void data_deinit() {
 int data_get_current_steps() {
   /// Debug
   // return 14100;
-  // return 10500;
+  // return 12000;
   return s_current_steps;
 }
-
-// int data_get_daily_goal() {
-//   return dailyGoal;
-// }
 
 void data_set_current_steps(int value) {
   s_current_steps = value;
@@ -139,49 +133,10 @@ GBitmap* data_get_Battery(bool isCharging) {
     else return sbmpBattery;
 }
 
-// void setTimeOfDay(struct tm* tm){
-//   /// start the walking day at 8 am
-//   if(tm->tm_hour<stDailyGoal.startHr){
-//     dailyStepsPercentage=0;
-//   }
-//   else if(tm->tm_hour==stDailyGoal.startHr && tm->tm_min<stDailyGoal.startMin){
-//       dailyStepsPercentage=0;
-//   }
-//   else if(tm->tm_hour>stDailyGoal.endHr){
-//     dailyStepsPercentage=100;
-//   }
-//   else if(tm->tm_hour==stDailyGoal.endHr && tm->tm_min>stDailyGoal.endMin){
-//     dailyStepsPercentage=100;
-//   }
-//   else{
-
-//      dailyStepsPercentage = 100.*((tm->tm_hour-stDailyGoal.startHr)*60.+tm->tm_min)/(stDailyGoal.walkTime);
-//   }
-// }
-
-// int getDailyStepsPercentage(){
-//   return dailyStepsPercentage;
-// }
-
-// int getCurrentDailySteps(){
-//   // return data_get_daily_goal()*.25;
-//   return dailyStepsPercentage*data_get_daily_goal()/100.;
-// }
-
 void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Message received");
   Tuple *comm_ready = dict_find(iter, MESSAGE_KEY_JSReady);
-  
-  // Tuple *weather_units = dict_find(iter, MESSAGE_KEY_tempUnits);
-  // Tuple *weather_temp = dict_find(iter, MESSAGE_KEY_showTemp);
-  // Tuple *weather_show = dict_find(iter, MESSAGE_KEY_showWeather);
-  
-  // Tuple *daily_goal_tick = dict_find(iter, MESSAGE_KEY_goalTick);
-  // Tuple *daily_goal_steps = dict_find(iter, MESSAGE_KEY_dailySteps);
-  // Tuple *daily_goal_start = dict_find(iter, MESSAGE_KEY_dailyStart);
-  // Tuple *daily_goal_end = dict_find(iter, MESSAGE_KEY_dailyEnd);
-  
-  if(comm_ready) {
+   if(comm_ready) {
     APP_LOG(APP_LOG_LEVEL_DEBUG,"[%ld][%ld][%ld][%ld]",MESSAGE_KEY_showWeather,MESSAGE_KEY_tempUnits,MESSAGE_KEY_showTemp,MESSAGE_KEY_goalTick);
     bool flgComm_ready = comm_ready->value->int32 == 1;
     APP_LOG(APP_LOG_LEVEL_DEBUG,flgComm_ready?"Comm ready":"Comm not ready");
@@ -196,41 +151,7 @@ void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
         APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetch fail!");
       }
     }
-  }
-
-  
-  // if(daily_goal_tick) {
-  //   flgDailyGoalShow = daily_goal_tick->value->int32 == 1;
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,flgDailyGoalShow?"Daily goal true":"Daily goal false");
-  // }
-  
-  // if(daily_goal_steps) {
-  //   dailyGoal = daily_goal_steps->value->int32 ;
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal :%d",atoi(daily_goal_steps->value->cstring));
-  // }
-  // if(daily_goal_start){
-  //   getHourAndMinutes(daily_goal_start->value->cstring ,&stDailyGoal.startHr,&stDailyGoal.startMin);
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d",stDailyGoal.startHr,stDailyGoal.startMin);
-  // }
-  // if(daily_goal_end){
-  //   getHourAndMinutes(daily_goal_end->value->cstring ,&stDailyGoal.endHr,&stDailyGoal.endMin);
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end (%s) %d:%d",daily_goal_end->value->cstring,stDailyGoal.endHr,stDailyGoal.endMin);
-  // } 
-  // if(weather_units){
-  //   flgWeatherCelcius = (weather_units->value->int8 == 'c');
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,"Use celcius:[%s],[%u],[%c]",flgWeatherCelcius?"YES":"NO",weather_units->value->uint8,weather_units->value->uint8);
-  // } 
-  // if(weather_temp){
-  //   flgWeatherTemperature = (weather_temp->value->int32 == 1);
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,"Show temperature:[%s]",flgWeatherTemperature?"YES":"NO");
-  // } 
-  // if(weather_show){
-  //   flgWeatherShow = (weather_show->value->int32 == 1);
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG,"Show weather:[%s]",flgWeatherShow?"YES":"NO");
-  // } 
-  // /// review minutes and midnight
-  // stDailyGoal.walkTime=(stDailyGoal.endHr-stDailyGoal.startHr)*60+(stDailyGoal.endMin-stDailyGoal.startMin);
-  // /// redraw this should be move to main
+  } 
   main_window_redraw();
   layer_mark_dirty(window_get_root_layer(win));
 };
