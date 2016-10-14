@@ -35,6 +35,7 @@ void data_update_steps_buffer() {
 
 static void load_health_data_handler(void *context) {
   s_current_steps = health_service_sum_today(HealthMetricStepCount);
+  // s_current_steps = 12000;
   persist_write_int(AppKeyCurrentSteps, s_current_steps);
   data_update_steps_buffer();
 }
