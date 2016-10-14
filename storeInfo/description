@@ -1,1 +1,3 @@
-This watchface is an "enhanced" clone of pebble Stride watchface. Changes include: Icon to show phone connection status, Battery icon, Date, configurable daily goal.
+A digital watchface featuring Pebble Health activity data. Follow the progress of your step count on the outer ring. Cross the line when you've passed your current daily goal count. See your current total step count above the time. Other features include connection icon, battery icon and temperature.
+
+NOTE:This watchface is an "enhanced" clone of pebble Stride watchface. 
