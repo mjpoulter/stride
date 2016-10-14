@@ -76,10 +76,10 @@
       "watchface": true
     },
     "targetPlatforms": [
-      "aplite*",
+      "aplite",
       "basalt",
-      "chalk*",
-      "diorite*",
+      "chalk",
+      "diorite",
       "emery*"
     ],
     "capabilities": [

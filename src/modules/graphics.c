@@ -20,36 +20,6 @@
 
 static Window *s_window;
 
-
-
-/// Compute current daily steps here
-
-// void setTimeOfDay(struct tm* tm){
-//   /// start the walking day at 8 am
-//   struct stDailyGoal dailyGoal = config_getDailyGoal();
-//   if(tm->tm_hour<dailyGoal.startHr){
-//     dailyStepsPercentage=0;
-//   }
-//   else if(tm->tm_hour==dailyGoal.startHr && tm->tm_min<dailyGoal.startMin){
-//       dailyStepsPercentage=0;
-//   }
-//   else if(tm->tm_hour>dailyGoal.endHr){
-//     dailyStepsPercentage=100;
-//   }
-//   else if(tm->tm_hour==dailyGoal.endHr && tm->tm_min>dailyGoal.endMin){
-//     dailyStepsPercentage=100;
-//   }
-//   else{
-
-//      dailyStepsPercentage = 100.*((tm->tm_hour-dailyGoal.startHr)*60.+tm->tm_min)/(dailyGoal.walkTime);
-//   }
-// }
-
-// int getCurrentDailySteps(){
-//   // return data_get_daily_goal()*.25;
-//   return dailyStepsPercentage*data_get_daily_goal()/100.;
-// }
-
 #if defined(PBL_RECT)
 static int get_rect_perimeter()
 {
@@ -264,19 +234,9 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
 /// This method draws the yellow tick
 /// This should be current and goal
 void graphics_fill_goal_line(GContext *ctx, int currentGoal,
-                             int line_length, int line_width, GRect frame, GColor color)
-{
-  /// double check this goal
-  // const int current = data_get_current_steps();
-  // const int currentGoal = getCurrentDailySteps();
-  const int goal = config_get_daily_goal();
-  // if(current_average == 0) {
-  //   // Do not draw
-  //   return;
-  // }
-
+                             int line_length, int line_width, GRect frame, GColor color){
+    const int goal = config_get_daily_goal();
   graphics_context_set_stroke_color(ctx, color);
-  /// This should be current and goal
   const GPoint line_outer_point = steps_to_point(currentGoal, goal, frame);
 
 #if defined(PBL_RECT)
@@ -292,8 +252,7 @@ void graphics_fill_goal_line(GContext *ctx, int currentGoal,
 
 void graphics_draw_weather(GContext *ctx, GRect bounds, GColor color, GBitmap *bitmap){
   GRect weather_text_box = bounds;
-  //GRect shoe_bitmap_box = bounds;
-    char temp_buffer [5];//= itoa(data_get_temp());
+    char temp_buffer [5];
     if (data_get_temp(true) != -278){
       snprintf(temp_buffer, sizeof(temp_buffer), "%d %c", data_get_temp(config_getWeather().flgCelcius),config_getWeather().flgCelcius?'C':'F');
     }
@@ -351,7 +310,7 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
 #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE)
   /// Override color
   color = GColorWhite;
-#endif // PBL_
+#endif
   graphics_context_set_text_color(ctx, color);
   graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeSmall),
                      steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
@@ -384,4 +343,3 @@ void graphics_set_window(Window *window)
 {
   s_window = window;
 }
-
