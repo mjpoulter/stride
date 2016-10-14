@@ -16,12 +16,13 @@ module.exports = [
         "label": "Show temperature",
         "defaultValue": 1
       },
-      {
-        "type": "toggle",
-        "label": "Show weather",
-        "defaultValue": 1,
-        "messageKey": "showWeather"
-      },
+      // Disable this option on this release
+      // {
+      //   "type": "toggle",
+      //   "label": "Show weather",
+      //   "defaultValue": 1,
+      //   "messageKey": "showWeather"
+      // },
       {
         "type": "select",
         "messageKey": "tempUnits",
