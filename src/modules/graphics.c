@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include "config.h"
 
 #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_BASALT) || defined(PBL_PLATFORM_CHALK) || defined(PBL_PLATFORM_DIORITE)
 #define TOP_RIGHT 72
@@ -18,6 +19,36 @@
 #define MIN(a, b) ((a) < (b) ? a : b)
 
 static Window *s_window;
+
+
+
+/// Compute current daily steps here
+
+// void setTimeOfDay(struct tm* tm){
+//   /// start the walking day at 8 am
+//   struct stDailyGoal dailyGoal = config_getDailyGoal();
+//   if(tm->tm_hour<dailyGoal.startHr){
+//     dailyStepsPercentage=0;
+//   }
+//   else if(tm->tm_hour==dailyGoal.startHr && tm->tm_min<dailyGoal.startMin){
+//       dailyStepsPercentage=0;
+//   }
+//   else if(tm->tm_hour>dailyGoal.endHr){
+//     dailyStepsPercentage=100;
+//   }
+//   else if(tm->tm_hour==dailyGoal.endHr && tm->tm_min>dailyGoal.endMin){
+//     dailyStepsPercentage=100;
+//   }
+//   else{
+
+//      dailyStepsPercentage = 100.*((tm->tm_hour-dailyGoal.startHr)*60.+tm->tm_min)/(dailyGoal.walkTime);
+//   }
+// }
+
+// int getCurrentDailySteps(){
+//   // return data_get_daily_goal()*.25;
+//   return dailyStepsPercentage*data_get_daily_goal()/100.;
+// }
 
 #if defined(PBL_RECT)
 static int get_rect_perimeter()
@@ -156,7 +187,7 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
   /// Override color
   color = GColorWhite;
 #endif                                          // PBL_
-  const int daily_goal = data_get_daily_goal(); // data_get_daily_average();
+  const int daily_goal = config_get_daily_goal(); // data_get_daily_average();
   if (daily_goal == 0)
   {
     // Do not draw
@@ -232,13 +263,13 @@ void graphics_fill_outer_ring(GContext *ctx, int32_t current_steps,
 }
 /// This method draws the yellow tick
 /// This should be current and goal
-void graphics_fill_goal_line(GContext *ctx, /*int32_t day_goal_steps,*/
+void graphics_fill_goal_line(GContext *ctx, int currentGoal,
                              int line_length, int line_width, GRect frame, GColor color)
 {
   /// double check this goal
   // const int current = data_get_current_steps();
-  const int currentGoal = getCurrentDailySteps();
-  const int goal = data_get_daily_goal();
+  // const int currentGoal = getCurrentDailySteps();
+  const int goal = config_get_daily_goal();
   // if(current_average == 0) {
   //   // Do not draw
   //   return;
@@ -263,8 +294,8 @@ void graphics_draw_weather(GContext *ctx, GRect bounds, GColor color, GBitmap *b
   GRect weather_text_box = bounds;
   //GRect shoe_bitmap_box = bounds;
     char temp_buffer [5];//= itoa(data_get_temp());
-    if (data_get_temp() != -278){
-      snprintf(temp_buffer, sizeof(temp_buffer), "%d C", data_get_temp());
+    if (data_get_temp(true) != -278){
+      snprintf(temp_buffer, sizeof(temp_buffer), "%d %c", data_get_temp(config_getWeather().flgCelcius),config_getWeather().flgCelcius?'C':'F');
     }
     else{
       snprintf(temp_buffer, sizeof(temp_buffer), "Sync");
@@ -353,3 +384,4 @@ void graphics_set_window(Window *window)
 {
   s_window = window;
 }
+
