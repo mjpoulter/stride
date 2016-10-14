@@ -7,12 +7,21 @@ This watchface is a "enhanced" version of pebble [Stride](https://apps.getpebble
 * Battery icon. Charge is shown as solid bar. When charging will show a different icon.
 * Date
 * When connected/disconnected from the phone will vibrate
-* The Daily average where replaced with a goal of 14,000 steps. The yellow tick will move linearly from 0 at 8:00 to 14,000 at 00:00
+* The Daily average where replaced with a goal.
+* Local weather
+* Daily goal is configurable
 
-## Peble time
-![Above target](storeInfo/screenshots/basalt/aboveTarget.png)![Below target](storeInfo/screenshots/basalt/belowTarget.png)![Above daily goal](storeInfo/screenshots/basalt/aboveDailyGoal.png)![Alternate icones](storeInfo/screenshots/basalt/alternateIcons.png)
-## Peble
-![Above complete](storeInfo/screenshots/aplite/aboveComplete.png)![Below complete](storeInfo/screenshots/aplite/belowComplete.png)
+## Peble Time
+![Above target](storeInfo/screenshots/basalt/animation.gif)![Below target](storeInfo/screenshots/basalt/belowTarget.png)![Above daily goal](storeInfo/screenshots/basalt/aboveDailyGoal.png)![Alternate icones](storeInfo/screenshots/basalt/alternateIcons.png)
 
+## Pebble Round
+![Above complete](storeInfo/screenshots/chalk/temperature.png)![Below complete](storeInfo/screenshots/chalk/belowTarget.png)
 
-The code is based on [Mitchell Roy](mailto:mitchell@pabble.com) and [Chris Lewis](mailto:Bonsitm@gmail.com) [health-watchface](https://github.com/pebble-examples/health-watchface.git). Health-watchface is a reference copy of the official pebble Stride health watchface. 
+## Peble and Pebble 2
+![Above complete](storeInfo/screenshots/aplite/temperature.png)![Below complete](storeInfo/screenshots/aplite/aboveComplete.png)
+
+You need to add weather support before the App can be compile. Run the following command in the terminal
+
+```$pebble package install pebble-generic-weather```
+
+The code is based on [Mitchell Roy](mailto:mitchell@pabble.com) and [Chris Lewis](mailto:Bonsitm@gmail.com) [health-watchface](https://github.com/pebble-examples/health-watchface.git). Health-watchface is a reference copy of the official pebble Stride health watchface.

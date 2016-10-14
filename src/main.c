@@ -1,9 +1,9 @@
 #include <pebble.h>
+#include <pebble-events/pebble-events.h>
 
 #include "modules/data.h"
 #include "modules/health.h"
 #include "modules/util.h"
-
 #include "windows/main_window.h"
 
 /// Vibration pattern connection lost
@@ -13,6 +13,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits changed) {
   main_window_update_time(tick_time);
   data_reload_averages();
   main_window_redraw();
+  weather_update(tick_time, changed);
 }
 
 void hdlBle(bool state){
@@ -35,8 +36,10 @@ void hdlBattery(BatteryChargeState battery){
 }
 
 void init() {
-  data_init();
-  health_init();
+ data_init();
+config_init();
+ health_init();
+ events_app_message_open();
   main_window_push();
   connection_service_subscribe((ConnectionHandlers) {
   .pebble_app_connection_handler = hdlBle,
@@ -45,8 +48,6 @@ void init() {
   battery_state_service_subscribe (&hdlBattery);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   hdlBattery(battery_state_service_peek());
-  app_message_register_inbox_received(prv_inbox_received_handler);
-  app_message_open(128, 128);
   main_window_update_time(util_get_tm());
 }
 

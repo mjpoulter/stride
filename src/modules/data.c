@@ -1,4 +1,5 @@
 #include "data.h"
+#include <pebble-events/pebble-events.h>
 
 typedef enum {
   AppKeyCurrentAverage = 0,
@@ -16,19 +17,11 @@ static GBitmap *s_blue_shoe, *s_red_shoe,*s_green_shoe, *sbmpBleN,*sbmpBle,*sbmp
 
 static GFont s_font_small, s_font_big, s_font_med;
 static Window *win;
+static int tempC;
+static int tempF;
 static int s_current_steps;
 static char s_current_steps_buffer[8];
-static int dailyStepsPercentage;
-static bool flgDailyGoalShow=true;
-static int dailyGoal=14000;
-static struct {
-  int startHr;
-  int startMin;
-  int endHr;
-  int endMin;
-  int walkTime;
-} stDailyGoal;
-
+static bool flgWeatherReady;
 void data_update_steps_buffer() {
   int thousands = s_current_steps / 1000;
   int hundreds = s_current_steps % 1000;
@@ -41,8 +34,8 @@ void data_update_steps_buffer() {
 }
 
 static void load_health_data_handler(void *context) {
-  // const struct tm *time_now = util_get_tm();
   s_current_steps = health_service_sum_today(HealthMetricStepCount);
+  // s_current_steps = 12000;
   persist_write_int(AppKeyCurrentSteps, s_current_steps);
   data_update_steps_buffer();
 }
@@ -52,8 +45,15 @@ void data_reload_averages() {
 }
 
 void data_init() {
+  /// Init Communication
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"data_init");
+  /// Weather init opens communication
+  flgWeatherReady=false;
+  generic_weather_init();
+  /// We register to the inbox after the weather initialize everything
+  events_app_message_register_inbox_received(prv_inbox_received_handler,NULL);
+  events_app_message_register_inbox_dropped(inbox_dropped_callback,NULL);
   // Load resources
-  /// @TODO: Quick patch. We need to do a refactor to have a more neat image managing
   #if defined(PBL_PLATFORM_APLITE) || defined(PBL_PLATFORM_DIORITE) 
   s_green_shoe = gbitmap_create_with_resource(RESOURCE_ID_WHITE_SHOE_LOGO);
   s_blue_shoe = s_green_shoe;
@@ -79,12 +79,6 @@ void data_init() {
   data_update_steps_buffer();
   // Avoid half-second delay loading the app by delaying API read
   data_reload_averages();
-
-  stDailyGoal.startHr=8;
-  stDailyGoal.startMin=0;
-  stDailyGoal.endHr=24;
-  stDailyGoal.endMin=0;
-  stDailyGoal.walkTime=16*60;
 }
 
 void data_deinit() {
@@ -95,12 +89,9 @@ void data_deinit() {
 
 int data_get_current_steps() {
   /// Debug
-  //return 16000;
+  // return 14100;
+  // return 12000;
   return s_current_steps;
-}
-
-int data_get_daily_goal() {
-  return dailyGoal;
 }
 
 void data_set_current_steps(int value) {
@@ -143,84 +134,79 @@ GBitmap* data_get_Battery(bool isCharging) {
     else return sbmpBattery;
 }
 
-void setTimeOfDay(struct tm* tm){
-  /// start the walking day at 8 am
-  if(tm->tm_hour<stDailyGoal.startHr){
-    dailyStepsPercentage=0;
-  }
-  else if(tm->tm_hour==stDailyGoal.startHr && tm->tm_min<stDailyGoal.startMin){
-      dailyStepsPercentage=0;
-  }
-  else if(tm->tm_hour>stDailyGoal.endHr){
-    dailyStepsPercentage=100;
-  }
-  else if(tm->tm_hour==stDailyGoal.endHr && tm->tm_min>stDailyGoal.endMin){
-    dailyStepsPercentage=100;
-  }
-  else{
-     APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d end %d:%d",stDailyGoal.startHr,stDailyGoal.startMin,stDailyGoal.endHr,stDailyGoal.endMin);
-     APP_LOG(APP_LOG_LEVEL_DEBUG,"Hr Diff %d, min diff %d, wt %d",tm->tm_hour-stDailyGoal.startHr,+tm->tm_min,stDailyGoal.walkTime);
-     dailyStepsPercentage = 100.*((tm->tm_hour-stDailyGoal.startHr)*60.+tm->tm_min)/(stDailyGoal.walkTime);
-  }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "daily steps percentage is (%d)\n",dailyStepsPercentage);
-}
-
-int getDailyStepsPercentage(){
-  return dailyStepsPercentage;
-}
-
-int getCurrentDailySteps(){
-  // return data_get_daily_goal()*.25;
-  return dailyStepsPercentage*data_get_daily_goal()/100.;
-}
-
-bool drawDailyGoal(){
- return flgDailyGoalShow; 
-}
-
- void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Config menu");
-  Tuple *daily_goal_tick = dict_find(iter, MESSAGE_KEY_goalTick);
-  Tuple *daily_goal_steps = dict_find(iter, MESSAGE_KEY_dailySteps);
-  Tuple *daily_goal_start = dict_find(iter, MESSAGE_KEY_dailyStart);
-  Tuple *daily_goal_end = dict_find(iter, MESSAGE_KEY_dailyEnd);
-
-  if(daily_goal_tick) {
-    flgDailyGoalShow = daily_goal_tick->value->int32 == 1;
-    APP_LOG(APP_LOG_LEVEL_DEBUG,flgDailyGoalShow?"Daily goal true":"Daily goal false");
-  }
-  if(daily_goal_steps) {
-    dailyGoal = daily_goal_steps->value->int32 ;
-    APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal :%d",atoi(daily_goal_steps->value->cstring));
-  }
-  if(daily_goal_start){
-    getHourAndMinutes(daily_goal_start->value->cstring ,&stDailyGoal.startHr,&stDailyGoal.startMin);
-    APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start %d:%d",stDailyGoal.startHr,stDailyGoal.startMin);
-  }
-  else APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal start NA");
-  if(daily_goal_end){
-    getHourAndMinutes(daily_goal_end->value->cstring ,&stDailyGoal.endHr,&stDailyGoal.endMin);
-    APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end (%s) %d:%d",daily_goal_end->value->cstring,stDailyGoal.endHr,stDailyGoal.endMin);
+void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Message received");
+  Tuple *comm_ready = dict_find(iter, MESSAGE_KEY_JSReady);
+   if(comm_ready) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"[%ld][%ld][%ld][%ld]",MESSAGE_KEY_showWeather,MESSAGE_KEY_tempUnits,MESSAGE_KEY_showTemp,MESSAGE_KEY_goalTick);
+    bool flgComm_ready = comm_ready->value->int32 == 1;
+    APP_LOG(APP_LOG_LEVEL_DEBUG,flgComm_ready?"Comm ready":"Comm not ready");
+    if (flgComm_ready){
+      APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather init");
+      weather_init();
+      if(generic_weather_fetch(&weather_callback)){
+        APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetched!");
+        flgWeatherReady=true;
+      }
+      else{
+        APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetch fail!");
+      }
+    }
   } 
-  else APP_LOG(APP_LOG_LEVEL_DEBUG,"Daily goal end NA");
-  /// review minutes and midnight
-  stDailyGoal.walkTime=(stDailyGoal.endHr-stDailyGoal.startHr)*60+(stDailyGoal.endMin-stDailyGoal.startMin);
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"Walktime %d",stDailyGoal.walkTime);
-  /// redraw this should be move to main
   main_window_redraw();
   layer_mark_dirty(window_get_root_layer(win));
 };
 
-void getHourAndMinutes(char* buffer,int *hr,int *min){
-  char number[3]={'\0','\0','\0'};
-  number[0]=buffer[0];
-  number[1]=buffer[1];
-  *hr=atoi(number);
-  number[0]=buffer[3];
-  number[1]=buffer[4];
-  *min=atoi(number);
+void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  // A message was received, but had to be dropped
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped. Reason: %d", (int)reason);
 }
+
+
 
 void storeRootWindow(Window* w){
   win=w;
+}
+
+void weather_init(){
+    //generic_weather_init();
+    generic_weather_set_provider(GenericWeatherProviderOpenWeatherMap);
+    generic_weather_set_api_key("5203d95b1a7973943dee2ca61eb050f9");
+    generic_weather_set_feels_like(false); 
+}
+
+void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status){
+        switch (status){
+          case GenericWeatherStatusAvailable:
+          APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather ready [%d]",info->temp_c);
+          tempC = info->temp_c;
+          tempF = info->temp_f;
+          flgWeatherReady=true;
+          break;
+        default:
+          APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather not ready");
+          tempC = -278;
+          tempF = -460;
+          flgWeatherReady=false;
+          break;
+        }
+}
+
+int data_get_temp(bool celcius){
+  if (celcius){
+    return tempC;
+  } else{
+    return tempF;
+  }
+}
+
+void weather_update(struct tm *tick_time, TimeUnits changed){
+  if(changed==MINUTE_UNIT){
+    if(!flgWeatherReady) {
+      generic_weather_fetch(&weather_callback);
+    }
+  }
+  if(tick_time->tm_min==0 || tick_time->tm_min==30){
+     generic_weather_fetch(&weather_callback);
+  }
 }

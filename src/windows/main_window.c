@@ -15,13 +15,37 @@ static const char *const s_month_names[12] =
 static bool bleConnected;
 static bool batteryCharging;
 static int batteryLevel;
+static int dailyStepsPercentage;
+
+
+void updateDailyStepsPercentage(struct tm* tm){
+  /// start the walking day at 8 am
+  struct stDailyGoal dailyGoal = config_getDailyGoal();
+  if(tm->tm_hour<dailyGoal.startHr){
+    dailyStepsPercentage=0;
+  }
+  else if(tm->tm_hour==dailyGoal.startHr && tm->tm_min<dailyGoal.startMin){
+      dailyStepsPercentage=0;
+  }
+  else if(tm->tm_hour>dailyGoal.endHr){
+    dailyStepsPercentage=100;
+  }
+  else if(tm->tm_hour==dailyGoal.endHr && tm->tm_min>dailyGoal.endMin){
+    dailyStepsPercentage=100;
+  }
+  else{
+
+     dailyStepsPercentage = 100.*((tm->tm_hour-dailyGoal.startHr)*60.+tm->tm_min)/(dailyGoal.walkTime);
+  }
+}
 
 static void progress_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   const int fill_thickness = PBL_IF_RECT_ELSE(12, (180 - grect_inset(bounds, GEdgeInsets(12)).size.h) / 2);
   int current_steps = data_get_current_steps();
-  int current_goal = getCurrentDailySteps();
-  int daily_goal = data_get_daily_goal();
+  struct stDailyGoal dailyGoal= config_getDailyGoal();
+  int current_goal = dailyStepsPercentage*dailyGoal.steps/100.;
+  int daily_goal = config_get_daily_goal();
   GColor scheme_color;
   GBitmap *bitmap;
   // Decide color scheme based on progress to/past goal
@@ -47,18 +71,25 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
     }
 
   graphics_draw_outer_dots(ctx, bounds);
-  if(drawDailyGoal()) graphics_fill_goal_line(ctx, 17, 4, bounds, GColorYellow);
+  if(config_getDailyGoal().flgShow) graphics_fill_goal_line(ctx,current_goal, 17, 4, bounds, GColorYellow);
+  
   graphics_draw_steps_value(ctx, bounds, scheme_color, bitmap);
   GPoint pt;
   pt.x=15;
   #if defined(PBL_RECT)
     pt.y=15;
+      const GRect weather_rect = grect_inset(bounds, GEdgeInsets(bounds.size.h/2-55, 0, 0, 0));  
   #elif defined(PBL_ROUND)
      pt.y=20;
+    const GRect weather_rect = grect_inset(bounds, GEdgeInsets(bounds.size.h/2-55, 0, 0, 0));  
+
   #endif
   graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);
   pt.x=15;
   pt.y=15;
+  if (config_getWeather().flgTemperature){
+      graphics_draw_weather(ctx, weather_rect, GColorWhite, NULL);    
+  }
 }
 
 static void text_update_proc(Layer *layer, GContext *ctx) {
@@ -80,9 +111,9 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
   const int y_margin = PBL_IF_RECT_ELSE(8, 2);
   const GRect time_rect = grect_inset(layer_bounds, GEdgeInsets(-y_margin, 0, 0, x_margin));
 #if defined(PBL_RECT)
-  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+10, 0, 0, x_margin+3));  
+  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+10, 0, 0, x_margin+3));
 #elif defined(PBL_ROUND)
-  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+22, 0, 0, x_margin+9));  
+  const GRect date_rect = grect_inset(layer_bounds, GEdgeInsets(y_margin+22, 0, 0, x_margin+9));
 #endif
   graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, s_current_time_buffer, font_large, time_rect,
@@ -100,6 +131,7 @@ static void text_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_text(ctx, am ? "AM" : "PM", font_med, period_rect,
                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   } 
+
 }
 
 /*********************************** Window ***********************************/
@@ -135,7 +167,7 @@ void main_window_push() {
 
 void main_window_update_time(struct tm* tick_time) {
   /// set the current daily progress
-  setTimeOfDay(tick_time);
+  updateDailyStepsPercentage(tick_time);
   strftime(s_current_time_buffer, sizeof(s_current_time_buffer),
     clock_is_24h_style() ? "%H:%M" : "%l:%M", tick_time);
  /// Added to support date 
