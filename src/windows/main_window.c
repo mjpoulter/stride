@@ -87,8 +87,9 @@ static void progress_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_status_icons(ctx, pt,data_get_Battery(batteryCharging),data_get_BLE(connection_service_peek_pebble_app_connection()),batteryLevel);
   pt.x=15;
   pt.y=15;
-    /// draw weather
-  graphics_draw_weather(ctx, weather_rect, GColorWhite, NULL);
+  if (config_getWeather().flgTemperature){
+      graphics_draw_weather(ctx, weather_rect, GColorWhite, NULL);    
+  }
 }
 
 static void text_update_proc(Layer *layer, GContext *ctx) {

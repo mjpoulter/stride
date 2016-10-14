@@ -17,7 +17,8 @@ static GBitmap *s_blue_shoe, *s_red_shoe,*s_green_shoe, *sbmpBleN,*sbmpBle,*sbmp
 
 static GFont s_font_small, s_font_big, s_font_med;
 static Window *win;
-static int temp;
+static int tempC;
+static int tempF;
 static int s_current_steps;
 static char s_current_steps_buffer[8];
 
@@ -254,15 +255,21 @@ void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status){
         switch (status){
           case GenericWeatherStatusAvailable:
           APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather ready [%d]",info->temp_c);
-          temp = info->temp_c;
+          tempC = info->temp_c;
+          tempF = info->temp_f;
           break;
         default:
           APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather not ready");
-          temp = -278;
+          tempC = -278;
+          tempF = -460;
           break;
         }
 }
 
-int data_get_temp(){
-  return temp;
+int data_get_temp(bool celcius){
+  if (celcius){
+    return tempC;
+  } else{
+    return tempF;
+  }
 }

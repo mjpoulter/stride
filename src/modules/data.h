@@ -21,7 +21,7 @@ int data_get_current_steps();
 void data_set_current_steps(int value);
 void data_set_current_average(int value); 
 // int data_get_daily_goal();
-int data_get_temp();
+int data_get_temp(bool celcius);
 void data_reload_averages();
 GFont data_get_font(FontSize size);
 GBitmap* data_get_blue_shoe();

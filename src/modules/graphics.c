@@ -294,8 +294,8 @@ void graphics_draw_weather(GContext *ctx, GRect bounds, GColor color, GBitmap *b
   GRect weather_text_box = bounds;
   //GRect shoe_bitmap_box = bounds;
     char temp_buffer [5];//= itoa(data_get_temp());
-    if (data_get_temp() != -278){
-      snprintf(temp_buffer, sizeof(temp_buffer), "%d C", data_get_temp());
+    if (data_get_temp(true) != -278){
+      snprintf(temp_buffer, sizeof(temp_buffer), "%d %c", data_get_temp(config_getWeather().flgCelcius),config_getWeather().flgCelcius?'C':'F');
     }
     else{
       snprintf(temp_buffer, sizeof(temp_buffer), "Sync");
