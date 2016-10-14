@@ -13,6 +13,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits changed) {
   main_window_update_time(tick_time);
   data_reload_averages();
   main_window_redraw();
+  weather_update(tick_time, changed);
 }
 
 void hdlBle(bool state){
@@ -35,7 +36,8 @@ void hdlBattery(BatteryChargeState battery){
 }
 
 void init() {
-  data_init();
+ data_init();
+config_init();
  health_init();
  events_app_message_open();
   main_window_push();
