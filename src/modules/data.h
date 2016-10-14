@@ -42,3 +42,4 @@ void inbox_dropped_callback(AppMessageResult reason, void *context) ;
 void storeRootWindow(Window* win);
 void weather_init();
 void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status);
+void weather_update(struct tm *tick_time, TimeUnits changed);

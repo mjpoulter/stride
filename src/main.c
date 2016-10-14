@@ -13,6 +13,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits changed) {
   main_window_update_time(tick_time);
   data_reload_averages();
   main_window_redraw();
+  weather_update(tick_time, changed);
 }
 
 void hdlBle(bool state){

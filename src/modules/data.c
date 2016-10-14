@@ -21,7 +21,7 @@ static int tempC;
 static int tempF;
 static int s_current_steps;
 static char s_current_steps_buffer[8];
-
+static bool flgWeatherReady;
 void data_update_steps_buffer() {
   int thousands = s_current_steps / 1000;
   int hundreds = s_current_steps % 1000;
@@ -48,6 +48,7 @@ void data_init() {
   /// Init Communication
   APP_LOG(APP_LOG_LEVEL_DEBUG,"data_init");
   /// Weather init opens communication
+  flgWeatherReady=false;
   generic_weather_init();
   /// We register to the inbox after the weather initialize everything
   events_app_message_register_inbox_received(prv_inbox_received_handler,NULL);
@@ -189,6 +190,7 @@ void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
       weather_init();
       if(generic_weather_fetch(&weather_callback)){
         APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetched!");
+        flgWeatherReady=true;
       }
       else{
         APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather fetch fail!");
@@ -257,11 +259,13 @@ void weather_callback(GenericWeatherInfo *info, GenericWeatherStatus status){
           APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather ready [%d]",info->temp_c);
           tempC = info->temp_c;
           tempF = info->temp_f;
+          flgWeatherReady=true;
           break;
         default:
           APP_LOG(APP_LOG_LEVEL_DEBUG,"Weather not ready");
           tempC = -278;
           tempF = -460;
+          flgWeatherReady=false;
           break;
         }
 }
@@ -271,5 +275,16 @@ int data_get_temp(bool celcius){
     return tempC;
   } else{
     return tempF;
+  }
+}
+
+void weather_update(struct tm *tick_time, TimeUnits changed){
+  if(changed==MINUTE_UNIT){
+    if(!flgWeatherReady) {
+      generic_weather_fetch(&weather_callback);
+    }
+  }
+  if(tick_time->tm_min==0 || tick_time->tm_min==30){
+     generic_weather_fetch(&weather_callback);
   }
 }
