@@ -10,17 +10,12 @@ This watchface is a "enhanced" version of pebble [Stride](https://apps.getpebble
 * The Daily average where replaced with a goal.
 * Local weather
 * Daily goal is configurable
+* Fonts for Steps larger, weather smaller.
 
 ## Peble Time
 ![Above target](storeInfo/screenshots/basalt/animation.gif)![Below target](storeInfo/screenshots/basalt/belowTarget.png)![Above daily goal](storeInfo/screenshots/basalt/aboveDailyGoal.png)![Alternate icones](storeInfo/screenshots/basalt/alternateIcons.png)
 
-## Pebble Round
-![Above complete](storeInfo/screenshots/chalk/temperature.png)![Below complete](storeInfo/screenshots/chalk/belowTarget.png)
 
-## Peble and Pebble 2
-![Above complete](storeInfo/screenshots/aplite/temperature.png)![Below complete](storeInfo/screenshots/aplite/aboveComplete.png)
-
-You need to add weather support before the App can be compile. Run the following command in the terminal
 
 ```$pebble package install pebble-generic-weather```
 
