@@ -12,6 +12,7 @@
 typedef enum {
   FontSizeSmall = 0,
   FontSizeMedium,
+  FontSizeMediumL,
   FontSizeLarge
 } FontSize;
 

@@ -15,7 +15,7 @@ typedef enum {
 /// added BLE and Battery
 static GBitmap *s_blue_shoe, *s_red_shoe,*s_green_shoe, *sbmpBleN,*sbmpBle,*sbmpBatteryCharging,*sbmpBattery;
 
-static GFont s_font_small, s_font_big, s_font_med;
+static GFont s_font_small, s_font_big, s_font_med,s_font_medb;
 static Window *win;
 static int tempC;
 static int tempF;
@@ -69,6 +69,7 @@ void data_init() {
   sbmpBleN=gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLEN);
   s_font_small = fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD);
   s_font_med = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+  s_font_medb = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
   s_font_big = fonts_get_system_font(FONT_KEY_BITHAM_30_BLACK);
   // First time persist
   if(!persist_exists(AppKeyCurrentSteps)) {
@@ -102,6 +103,7 @@ GFont data_get_font(FontSize size) {
   switch(size) {
     case FontSizeSmall:  return s_font_small;
     case FontSizeMedium: return s_font_med;
+    case FontSizeMediumL: return s_font_medb;
     case FontSizeLarge:  return s_font_big;
     default: return s_font_small;
   }

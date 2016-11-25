@@ -279,7 +279,7 @@ void graphics_draw_weather(GContext *ctx, GRect bounds, GColor color, GBitmap *b
     color = GColorWhite;
 #endif // PBL_
     graphics_context_set_text_color(ctx, color);
-    graphics_draw_text(ctx, temp_buffer, data_get_font(FontSizeMedium),
+    graphics_draw_text(ctx, temp_buffer, data_get_font(FontSizeSmall),
                        bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 
     //graphics_draw_bitmap_in_rect(ctx, bitmap, shoe_bitmap_box);
@@ -295,7 +295,7 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
   shoe_bitmap_box.size = gbitmap_get_bounds(data_get_green_shoe()).size;
 
   int text_width = graphics_text_layout_get_content_size(steps_buffer,
-                                                         data_get_font(FontSizeSmall), steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter)
+                                                         data_get_font(FontSizeMediumL), steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter)
                        .w;
   const int font_height = 14;
   const int padding = 5;
@@ -303,7 +303,7 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
   const int combined_width = shoe_bitmap_box.size.w + padding + text_width;
 
   steps_text_box.origin.x = (bounds.size.w / 2) - (combined_width / 2);
-  steps_text_box.origin.y = PBL_IF_RECT_ELSE(56, 60);
+  steps_text_box.origin.y = PBL_IF_RECT_ELSE(48, 53);
   shoe_bitmap_box.origin.x = (bounds.size.w / 2) + (combined_width / 2) - shoe_bitmap_box.size.w;
   shoe_bitmap_box.origin.y = PBL_IF_RECT_ELSE(60, 65);
 
@@ -312,7 +312,7 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
   color = GColorWhite;
 #endif
   graphics_context_set_text_color(ctx, color);
-  graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeSmall),
+  graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeMediumL),
                      steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 
   graphics_draw_bitmap_in_rect(ctx, bitmap, shoe_bitmap_box);
