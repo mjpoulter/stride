@@ -32,7 +32,7 @@ bool config_init(){
     dailyGoal.endHr=24;
     dailyGoal.endMin=0;
     dailyGoal.walkTime=16*60;
-    dailyGoal.steps=14000;
+    dailyGoal.steps=15000;
     weather.flgCelcius=true;
     weather.flgShow=true;
     weather.flgTemperature=true;
