@@ -311,7 +311,7 @@ void graphics_draw_steps_value(GContext *ctx, GRect bounds, GColor color, GBitma
   /// Override color
   color = GColorWhite;
 #endif
-  graphics_context_set_text_color(ctx, color);
+  graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, steps_buffer, data_get_font(FontSizeMediumL),
                      steps_text_box, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 
